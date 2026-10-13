@@ -57,11 +57,6 @@ const prev = () => {
   }
   nextTick(scrollTop)
 }
-const goTo = (i: number) => {
-  finished.value = false
-  index.value = i
-  nextTick(scrollTop)
-}
 const restart = () => {
   finished.value = false
   index.value = 0
@@ -96,25 +91,24 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
 <template>
   <div ref="topEl" class="guided" @touchstart.passive="onTouchStart" @touchend.passive="onTouchEnd">
-    <div class="bar" aria-hidden="true"><span :style="{ width: `${pct}%` }" /></div>
-
-    <ol class="dots" aria-label="Pasos">
-      <li v-for="(s, i) in steps" :key="i">
-        <button
-          class="dot"
-          :class="{ 'is-done': finished || i < index, 'is-current': !finished && i === index }"
-          :aria-label="`Ir a: ${s.title}`"
-          :aria-current="!finished && i === index ? 'step' : undefined"
-          @click="goTo(i)"
-        />
-      </li>
-    </ol>
+    <div
+      class="bar"
+      role="progressbar"
+      :aria-valuemin="1"
+      :aria-valuemax="steps.length"
+      :aria-valuenow="index + 1"
+      :aria-label="`Paso ${index + 1} de ${steps.length}`"
+    >
+      <span :style="{ width: `${pct}%` }" />
+    </div>
 
     <Transition name="step" mode="out-in">
       <section v-if="!finished && step" :key="index" class="step" aria-live="polite">
-        <p class="step__pos">Paso {{ index + 1 }} de {{ steps.length }}</p>
         <h2 class="step__title">{{ step.title }}</h2>
         <p v-if="step.subtitle" class="step__subtitle">{{ step.subtitle }}</p>
+
+        <!-- Enlaces secundarios (promesas, nota): solo en el primer paso -->
+        <div v-if="index === 0 && $slots.extras" class="step__extras"><slot name="extras" /></div>
 
         <PrayerBlocks :blocks="step.blocks" :drop-cap="index === 0" />
 
@@ -136,6 +130,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
             {{ doneToday(prayer.slug) ? 'Hoy ya está anotado' : 'Anotar el día de hoy' }}
           </button>
         </div>
+
+        <div v-if="$slots.extras" class="end__extras"><slot name="extras" /></div>
 
         <div class="end__actions">
           <button class="btn btn--quiet" @click="restart">Volver a empezar</button>
@@ -167,7 +163,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   background: var(--line);
   border-radius: 3px;
   overflow: hidden;
-  margin: 0.25rem 0 0.4rem;
+  margin: 0.5rem 0 1.25rem;
 }
 
 .bar span {
@@ -177,47 +173,28 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   transition: width 0.35s ease;
 }
 
-.dots {
+.step__extras,
+.end__extras {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px;
-  list-style: none;
-  margin: 0 0 0.9rem;
-  padding: 0;
+  gap: 0.25rem 1.1rem;
+  margin: -0.25rem 0 1rem;
+  font-size: 0.95rem;
 }
 
-.dot {
-  width: 1.5rem;
-  height: 1.5rem;
-  display: grid;
-  place-items: center;
+.end__extras {
+  justify-content: center;
+  margin: 0 0 1.25rem;
 }
 
-.dot::after {
-  content: '';
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  border: 1.5px solid var(--gold-soft);
-}
-
-.dot.is-done::after {
-  background: var(--gold-soft);
-}
-
-.dot.is-current::after {
-  width: 9px;
-  height: 9px;
-  background: var(--gold);
-  border-color: var(--gold);
-  transform: rotate(45deg);
-  border-radius: 1px;
-}
-
-.step__pos {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--rubric);
+.step__extras :deep(button),
+.end__extras :deep(button) {
+  color: var(--lapis);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 0.2em;
+  padding: 0.35rem 0;
 }
 
 .step__title {

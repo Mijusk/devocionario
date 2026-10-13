@@ -12,7 +12,6 @@ const category = computed(() => categories.find((c) => c.slug === prayer.value?.
 const settings = useSettings()
 const { isFavorite, toggle } = useFavorites()
 const recent = useRecent()
-const { daysFor, streak } = useTracking()
 const showSettings = ref(false)
 const showNote = ref(false)
 const showPromises = ref(false)
@@ -48,7 +47,11 @@ const share = async () => {
 
 <template>
   <div v-if="prayer" class="page">
-    <TopBar :title="category?.title" :back="category ? `/explorar/${category.slug}` : '/explorar'">
+    <TopBar
+      :title="guided ? prayer.title : category?.title"
+      :strong="guided"
+      :back="category ? `/explorar/${category.slug}` : '/explorar'"
+    >
       <button :aria-pressed="isFavorite(prayer.slug)" :aria-label="isFavorite(prayer.slug) ? 'Quitar de guardadas' : 'Guardar'" @click="toggle(prayer.slug)">
         <AppIcon name="bookmark" :filled="isFavorite(prayer.slug)" />
       </button>
@@ -61,38 +64,33 @@ const share = async () => {
     </TopBar>
 
     <article class="prayer">
-      <header class="prayer__head" :class="{ 'is-compact': guided }">
-        <h1>{{ prayer.title }}</h1>
-        <p v-if="prayer.author" class="prayer__author">{{ prayer.author }}</p>
+      <!-- Oraciones guiadas: el título va en la barra y el paso empieza enseguida -->
+      <GuidedPrayer v-if="guided" :prayer="prayer">
+        <template v-if="prayer.note || prayer.promises" #extras>
+          <button v-if="prayer.promises" @click="showPromises = true">Promesas</button>
+          <button v-if="prayer.note" @click="showNote = true">Sobre esta oración</button>
+        </template>
+      </GuidedPrayer>
 
-        <!-- En las oraciones de cada día la nota no ocupa sitio: va en un enlace -->
-        <p v-if="prayer.note && !guided" class="prayer__note">{{ prayer.note }}</p>
+      <template v-else>
+        <header class="prayer__head">
+          <h1>{{ prayer.title }}</h1>
+          <p v-if="prayer.author" class="prayer__author">{{ prayer.author }}</p>
+          <p v-if="prayer.note" class="prayer__note">{{ prayer.note }}</p>
+        </header>
 
-        <div v-if="guided" class="prayer__meta">
-          <ClientOnly>
-            <span v-if="prayer.tracking && daysFor(prayer.slug).length" class="prayer__track">
-              <AppIcon name="check" :size="16" />
-              {{ daysFor(prayer.slug).length }} {{ daysFor(prayer.slug).length === 1 ? 'día' : 'días' }}<template v-if="streak(prayer.slug) > 1">, {{ streak(prayer.slug) }} seguidos</template>
-            </span>
-          </ClientOnly>
-          <button v-if="prayer.note" class="prayer__link" @click="showNote = true">Sobre esta oración</button>
-          <button v-if="prayer.promises" class="prayer__link" @click="showPromises = true">Promesas</button>
+        <div class="prayer__body" :class="{ 'has-latin': settings.showLatin && prayer.latin }">
+          <PrayerBlocks :blocks="prayer.blocks ?? []" drop-cap />
+          <section v-if="settings.showLatin && prayer.latin" class="latin" lang="la">
+            <h2 class="latin__title">En latín</h2>
+            <PrayerBlocks :blocks="prayer.latin" />
+          </section>
         </div>
-      </header>
 
-      <GuidedPrayer v-if="prayer.steps" :prayer="prayer" />
-
-      <div v-else class="prayer__body" :class="{ 'has-latin': settings.showLatin && prayer.latin }">
-        <PrayerBlocks :blocks="prayer.blocks ?? []" drop-cap />
-        <section v-if="settings.showLatin && prayer.latin" class="latin" lang="la">
-          <h2 class="latin__title">En latín</h2>
-          <PrayerBlocks :blocks="prayer.latin" />
-        </section>
-      </div>
-
-      <button v-if="prayer.latin && !prayer.steps && !settings.showLatin" class="latin-toggle" @click="settings.showLatin = true">
-        Ver también en latín
-      </button>
+        <button v-if="prayer.latin && !settings.showLatin" class="latin-toggle" @click="settings.showLatin = true">
+          Ver también en latín
+        </button>
+      </template>
     </article>
 
     <BottomSheet v-if="prayer.note" v-model="showNote" :title="prayer.title">
@@ -139,41 +137,6 @@ const share = async () => {
   border-radius: 0 10px 10px 0;
   color: var(--ink-soft);
   font-size: 0.98rem;
-}
-
-/* Cabecera compacta de las oraciones guiadas: el texto empieza enseguida */
-.prayer__head.is-compact {
-  margin: 0.5rem 0 0.75rem;
-}
-
-.prayer__head.is-compact h1 {
-  font-size: clamp(1.6rem, 6.5vw, 2.1rem);
-}
-
-.prayer__meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.25rem 1.1rem;
-  margin-top: 0.35rem;
-  font-size: 0.95rem;
-}
-
-.prayer__track {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  color: var(--gold);
-  font-weight: 500;
-}
-
-.prayer__link {
-  color: var(--lapis);
-  font-weight: 500;
-  text-decoration: underline;
-  text-decoration-color: var(--line);
-  text-underline-offset: 0.2em;
-  padding: 0.35rem 0;
 }
 
 .sheet-text,

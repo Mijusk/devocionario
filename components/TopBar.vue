@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /** Barra superior de las pantallas de lectura: volver, título y acciones. */
-defineProps<{ title?: string; back?: string }>()
+/** `strong`: el título es el de la oración (más destacado, hasta dos líneas). */
+defineProps<{ title?: string; back?: string; strong?: boolean }>()
 
 const router = useRouter()
 const goBack = (fallback?: string) => {
@@ -14,7 +15,7 @@ const goBack = (fallback?: string) => {
     <button v-if="back" class="topbar__btn" aria-label="Volver" @click="goBack(back)">
       <AppIcon name="chevron-left" />
     </button>
-    <span class="topbar__title">{{ title }}</span>
+    <component :is="strong ? 'h1' : 'span'" class="topbar__title" :class="{ 'is-strong': strong }">{{ title }}</component>
     <div class="topbar__actions">
       <slot />
     </div>
@@ -52,6 +53,19 @@ const goBack = (fallback?: string) => {
   text-overflow: ellipsis;
   white-space: nowrap;
   padding: 0 0.25rem;
+}
+
+.topbar__title.is-strong {
+  font-family: var(--font-text);
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 0;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .topbar__actions {

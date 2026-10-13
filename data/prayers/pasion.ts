@@ -46,7 +46,7 @@ const promesas15Oraciones = {
 export const pasion: Prayer[] = [
   {
     slug: 'santa-brigida-12-anos',
-    title: 'Santa Brígida (12 años)',
+    title: 'Oraciones de Santa Brígida (12 años)',
     summary: 'Siete oraciones diarias sobre las llagas de Cristo.',
     category: 'pasion',
     tags: ['santa brígida', 'llagas', 'sangre de cristo', 'devoción'],
