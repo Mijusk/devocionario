@@ -38,13 +38,14 @@ Las oraciones están en `data/prayers/*.ts`, una sección por archivo. Cada una 
   blocks: [
     p('Acordaos, oh piadosísima Virgen María,\nque jamás se ha oído decir…'),
     vr('Ruega por nosotros, santa Madre de Dios.', 'Para que seamos dignos…'),
-    ref('gloria'),          // inserta otra oración, plegable
+    ref('gloria'),          // nombra otra oración; al tocarla se abre su texto
   ],
   latin: [p('Memorare, o piissima Virgo Maria…')],
 }
 ```
 
-- `p` párrafo (los `\n` son saltos de verso) · `h` subtítulo · `rubric` indicación en rojo · `vr` ℣/℟ · `quote` cita · `litany` letanía · `ref` otra oración.
+- `p` párrafo (los `\n` son saltos de verso) · `h` subtítulo · `rubric` indicación en rojo · `vr` ℣/℟ · `quote` cita · `litany` letanía · `ref` otra oración. Varios `ref` seguidos se muestran en una sola línea («Padre Nuestro, Avemaría y Gloria»).
+- `promises` añade el enlace «Promesas», que abre un panel con un comentario y la lista.
 - Para una oración paso a paso, usa `steps` en lugar de `blocks`. Un paso con `count` y `countText` muestra el contador de cuentas.
 - `tracking` activa el seguimiento de días.
 

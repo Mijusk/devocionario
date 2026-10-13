@@ -3,17 +3,54 @@ import { p, rubric, ref, pnAmGloria } from '../helpers'
 
 const ofrecimiento = 'Padre Eterno, por medio de las manos inmaculadas de María y el Sagrado Corazón de Jesús,'
 
-const notaBrigida =
-  'Devoción privada muy extendida. Las «promesas» que suelen acompañarla en estampas y folletos no están aprobadas por la Iglesia; la oración en sí es una hermosa meditación de la Pasión.'
+const comentarioPromesas =
+  'Estas promesas acompañan tradicionalmente a la devoción en estampas y folletos. La Iglesia nunca las ha aprobado oficialmente, así que conviene leerlas con prudencia. La oración en sí es buena y una hermosa meditación de la Pasión.'
+
+const promesas12Anos = {
+  comment: comentarioPromesas,
+  items: [
+    'El alma que las rece no sufrirá el purgatorio.',
+    'Será aceptada entre los mártires, como si hubiera derramado su sangre por la fe.',
+    'Podrá elegir a otras tres almas, a las que Jesús mantendrá en gracia suficiente para santificarse.',
+    'Ninguno de sus familiares de las cuatro generaciones siguientes se perderá.',
+    'Sabrá de su muerte un mes antes de que ocurra.',
+  ],
+  footnote: 'Según la misma tradición, si la persona muere antes de completar los doce años, el Señor lo acepta como cumplido; y si se omite algún día por causa justificada, puede recuperarse después.',
+}
+
+const promesas15Oraciones = {
+  comment: comentarioPromesas,
+  items: [
+    'Libraré del purgatorio a quince almas de su linaje.',
+    'Quince almas de su linaje serán confirmadas y conservadas en gracia.',
+    'Quince pecadores de su linaje se convertirán.',
+    'La persona que las rece alcanzará el primer grado de perfección.',
+    'Quince días antes de su muerte le daré mi precioso Cuerpo, para que se libre del hambre eterna, y mi preciosa Sangre, para que no tenga sed eternamente.',
+    'Quince días antes de su muerte sentirá una profunda contrición de todos sus pecados y tendrá perfecto conocimiento de ellos.',
+    'Pondré ante ella la señal de mi Cruz victoriosa, para su socorro y defensa contra sus enemigos.',
+    'Antes de su muerte vendré con mi queridísima Madre.',
+    'Recibiré benignamente su alma y la conduciré a los gozos eternos.',
+    'Allí le daré a beber de la fuente de mi Divinidad.',
+    'A quien haya vivido en pecado mortal durante treinta años y rece devotamente estas oraciones, o tenga intención de rezarlas, le perdonaré todos sus pecados.',
+    'Le libraré de las malas tentaciones.',
+    'Le conservaré y guardaré sus cinco sentidos.',
+    'Le libraré de la muerte repentina.',
+    'Libraré su alma de las penas eternas.',
+    'Obtendrá todo lo que pida a Dios y a la Santísima Virgen.',
+    'Si ha vivido haciendo su propia voluntad y hubiera de morir al día siguiente, se le alargará la vida.',
+    'Quien las enseñe a otros tendrá un gozo y un mérito que perdurarán eternamente.',
+    'Donde se recen estas oraciones, Dios está presente con su gracia.',
+  ],
+}
 
 export const pasion: Prayer[] = [
   {
     slug: 'santa-brigida-12-anos',
-    title: 'Santa Brígida · 12 años',
+    title: 'Santa Brígida (12 años)',
     summary: 'Siete oraciones diarias sobre las llagas de Cristo.',
     category: 'pasion',
     tags: ['santa brígida', 'llagas', 'sangre de cristo', 'devoción'],
-    note: notaBrigida,
+    promises: promesas12Anos,
     tracking: { label: 'Días rezados', goalDays: 365 * 12 },
     steps: [
       {
@@ -89,7 +126,7 @@ export const pasion: Prayer[] = [
     summary: 'Un año meditando la Pasión, oración a oración.',
     category: 'pasion',
     tags: ['santa brígida', 'pasión', 'devoción', 'un año'],
-    note: notaBrigida,
+    promises: promesas15Oraciones,
     tracking: { label: 'Días rezados', goalDays: 365 },
     steps: [
       {

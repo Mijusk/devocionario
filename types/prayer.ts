@@ -90,6 +90,8 @@ export interface Prayer {
   steps?: Step[]
   /** Texto original en latín, para mostrar en paralelo. */
   latin?: Block[]
+  /** Promesas tradicionales asociadas a la devoción, con un comentario previo. */
+  promises?: { comment: string; items: string[]; footnote?: string }
   /** Permite llevar la cuenta de días rezados (devociones largas). */
   tracking?: { label: string; goalDays?: number }
 }

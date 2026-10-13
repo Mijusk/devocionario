@@ -167,7 +167,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   background: var(--line);
   border-radius: 3px;
   overflow: hidden;
-  margin: 0.25rem 0 0.75rem;
+  margin: 0.25rem 0 0.4rem;
 }
 
 .bar span {
@@ -182,7 +182,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   flex-wrap: wrap;
   gap: 2px;
   list-style: none;
-  margin: 0 0 1.5rem;
+  margin: 0 0 0.9rem;
   padding: 0;
 }
 
@@ -230,11 +230,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   font-style: italic;
   font-size: 1.15rem;
   color: var(--ink-soft);
-  margin: 0 0 1.5rem;
+  margin: 0 0 1rem;
 }
 
 .step__title + :deep(.blocks) {
-  margin-top: 1.5rem;
+  margin-top: 1rem;
 }
 
 .step__after {

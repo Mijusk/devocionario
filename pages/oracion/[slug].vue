@@ -14,6 +14,9 @@ const { isFavorite, toggle } = useFavorites()
 const recent = useRecent()
 const { daysFor, streak } = useTracking()
 const showSettings = ref(false)
+const showNote = ref(false)
+const showPromises = ref(false)
+const guided = computed(() => !!prayer.value?.steps)
 const shareNote = ref('')
 
 useHead(() => ({ title: `${prayer.value?.title} · Devocionario` }))
@@ -58,16 +61,23 @@ const share = async () => {
     </TopBar>
 
     <article class="prayer">
-      <header class="prayer__head">
+      <header class="prayer__head" :class="{ 'is-compact': guided }">
         <h1>{{ prayer.title }}</h1>
         <p v-if="prayer.author" class="prayer__author">{{ prayer.author }}</p>
-        <p v-if="prayer.note" class="prayer__note">{{ prayer.note }}</p>
-        <ClientOnly>
-          <p v-if="prayer.tracking && daysFor(prayer.slug).length" class="prayer__track">
-            <AppIcon name="check" :size="18" />
-            {{ daysFor(prayer.slug).length }} {{ daysFor(prayer.slug).length === 1 ? 'día rezado' : 'días rezados' }}<template v-if="streak(prayer.slug) > 1">, {{ streak(prayer.slug) }} seguidos</template>
-          </p>
-        </ClientOnly>
+
+        <!-- En las oraciones de cada día la nota no ocupa sitio: va en un enlace -->
+        <p v-if="prayer.note && !guided" class="prayer__note">{{ prayer.note }}</p>
+
+        <div v-if="guided" class="prayer__meta">
+          <ClientOnly>
+            <span v-if="prayer.tracking && daysFor(prayer.slug).length" class="prayer__track">
+              <AppIcon name="check" :size="16" />
+              {{ daysFor(prayer.slug).length }} {{ daysFor(prayer.slug).length === 1 ? 'día' : 'días' }}<template v-if="streak(prayer.slug) > 1">, {{ streak(prayer.slug) }} seguidos</template>
+            </span>
+          </ClientOnly>
+          <button v-if="prayer.note" class="prayer__link" @click="showNote = true">Sobre esta oración</button>
+          <button v-if="prayer.promises" class="prayer__link" @click="showPromises = true">Promesas</button>
+        </div>
       </header>
 
       <GuidedPrayer v-if="prayer.steps" :prayer="prayer" />
@@ -84,6 +94,18 @@ const share = async () => {
         Ver también en latín
       </button>
     </article>
+
+    <BottomSheet v-if="prayer.note" v-model="showNote" :title="prayer.title">
+      <p class="sheet-text">{{ prayer.note }}</p>
+    </BottomSheet>
+
+    <BottomSheet v-if="prayer.promises" v-model="showPromises" title="Promesas" :subtitle="prayer.title">
+      <p class="promises__comment">{{ prayer.promises.comment }}</p>
+      <ol class="promises">
+        <li v-for="item in prayer.promises.items" :key="item">{{ item }}</li>
+      </ol>
+      <p v-if="prayer.promises.footnote" class="promises__foot">{{ prayer.promises.footnote }}</p>
+    </BottomSheet>
 
     <p v-if="shareNote" class="toast" role="status">{{ shareNote }}</p>
     <ReadingSettings v-model="showSettings" :has-latin="!!prayer.latin" />
@@ -119,13 +141,79 @@ const share = async () => {
   font-size: 0.98rem;
 }
 
-.prayer__track {
+/* Cabecera compacta de las oraciones guiadas: el texto empieza enseguida */
+.prayer__head.is-compact {
+  margin: 0.5rem 0 0.75rem;
+}
+
+.prayer__head.is-compact h1 {
+  font-size: clamp(1.6rem, 6.5vw, 2.1rem);
+}
+
+.prayer__meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
-  margin: 0.9rem 0 0;
+  gap: 0.25rem 1.1rem;
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+}
+
+.prayer__track {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   color: var(--gold);
   font-weight: 500;
+}
+
+.prayer__link {
+  color: var(--lapis);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 0.2em;
+  padding: 0.35rem 0;
+}
+
+.sheet-text,
+.promises__comment {
+  margin: 0 0 1rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.promises__comment {
+  font-style: italic;
+  padding: 0.7rem 0.85rem;
+  border-left: 2px solid var(--gold);
+  background: var(--vellum-deep);
+  border-radius: 0 10px 10px 0;
+  font-size: 0.95rem;
+}
+
+.promises {
+  margin: 0;
+  padding-left: 1.4rem;
+  font-family: var(--font-text);
+  font-size: calc(1.05rem * var(--reading-scale));
+  line-height: 1.5;
+}
+
+.promises li {
+  margin-bottom: 0.55rem;
+  padding-left: 0.2rem;
+}
+
+.promises li::marker {
+  color: var(--rubric);
+  font-weight: 700;
+}
+
+.promises__foot {
+  margin: 1rem 0 0;
+  font-size: 0.92rem;
+  color: var(--ink-faint);
 }
 
 @media (min-width: 1100px) {
