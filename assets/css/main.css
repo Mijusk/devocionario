@@ -1,0 +1,256 @@
+/* ─────────────────────────────────────────────────────────────
+   Devocionario · sistema visual
+   Fuente de inspiración: la tabla gótica de Santa Brígida
+   (cielo de lapislázuli con estrellas, pan de oro, vitela).
+   El rojo se reserva para rúbricas y ℣/℟, como en los misales.
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  --vellum: #f1f2f5;
+  --vellum-deep: #e6e8ee;
+  --surface: #fbfbfc;
+  --ink: #1b2236;
+  --ink-soft: #4b536a;
+  --ink-faint: #7a8197;
+  --lapis: #1f3a73;
+  --lapis-deep: #142a58;
+  --gold: #b48a35;
+  --gold-soft: #d8bf85;
+  --rubric: #a4262c;
+  --line: #d6d9e2;
+  --focus: #b48a35;
+
+  --font-text: 'Alegreya', 'Iowan Old Style', Georgia, serif;
+  --font-ui: 'Alegreya Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --reading-scale: 1;
+  --text-size: calc(1.1875rem * var(--reading-scale));
+  --measure: 34rem;
+
+  --nav-h: 4.25rem;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --vellum: #0e1527;
+    --vellum-deep: #141d33;
+    --surface: #131b30;
+    --ink: #e9e6dc;
+    --ink-soft: #b7b6b0;
+    --ink-faint: #8a8c95;
+    --lapis: #9fb4e4;
+    --lapis-deep: #182b57;
+    --gold: #d6b46a;
+    --gold-soft: #8d7440;
+    --rubric: #e47b74;
+    --line: #26304a;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --vellum: #0e1527;
+  --vellum-deep: #141d33;
+  --surface: #131b30;
+  --ink: #e9e6dc;
+  --ink-soft: #b7b6b0;
+  --ink-faint: #8a8c95;
+  --lapis: #9fb4e4;
+  --lapis-deep: #182b57;
+  --gold: #d6b46a;
+  --gold-soft: #8d7440;
+  --rubric: #e47b74;
+  --line: #26304a;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  background: var(--vellum);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 1.0625rem;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-text);
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Contenedor de página */
+.page {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: calc(1rem + var(--safe-t)) 1rem calc(var(--nav-h) + var(--safe-b) + 2rem);
+}
+
+@media (min-width: 900px) {
+  .page {
+    padding: 2.5rem 2rem 4rem;
+  }
+}
+
+/* Encabezado de sección: texto serif en cursiva, sin mayúsculas forzadas */
+.section-title {
+  font-family: var(--font-text);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.15rem;
+  color: var(--ink-soft);
+  margin: 2.25rem 0 0.5rem;
+}
+
+/* Lista con filetes finos, base de casi todas las pantallas */
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.rows > li {
+  border-bottom: 1px solid var(--line);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.9rem 0.25rem;
+  min-height: 3.5rem;
+}
+
+.row__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.row__title {
+  display: block;
+  font-family: var(--font-text);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.row__summary {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  margin-top: 0.15rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row__icon {
+  color: var(--gold);
+  flex: none;
+}
+
+.row:active {
+  background: var(--vellum-deep);
+}
+
+@media (hover: hover) {
+  .row:hover .row__title {
+    color: var(--lapis);
+  }
+}
+
+/* Botón principal */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.875rem;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+  background: var(--lapis);
+  color: var(--vellum);
+}
+
+.btn--gold {
+  background: var(--gold);
+  color: #1b1405;
+}
+
+.btn--quiet {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+/* Transición entre páginas: breve y solo de opacidad */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.16s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "devocionario",
+  "private": true,
+  "type": "module",
+  "description": "Devocionario web: oraciones católicas, Rosario guiado y devociones. PWA offline pensada para móvil.",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@fontsource/alegreya": "^5.1.0",
+    "@fontsource/alegreya-sans": "^5.1.0",
+    "nuxt": "^3.15.0",
+    "vue": "^3.5.0",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@vite-pwa/nuxt": "^0.10.6",
+    "typescript": "^5.6.0",
+    "vue-tsc": "^2.1.0"
+  }
+}
