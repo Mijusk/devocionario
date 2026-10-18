@@ -8,6 +8,7 @@ const list = computed(() => favorites.value.map((s) => prayersBySlug[s]).filter(
 const { active, daysFor, doneToday, toggleToday, streak } = useTracking()
 const tracked = computed(() => active.value.map((s) => prayersBySlug[s]).filter((p) => !!p))
 const showSettings = ref(false)
+const { savedPalabras, toggleSaved } = usePalabra()
 </script>
 
 <template>
@@ -64,6 +65,21 @@ const showSettings = ref(false)
           </li>
         </ul>
       </section>
+
+      <section v-if="savedPalabras.length">
+        <h2 class="section-title">Palabras de vida</h2>
+        <ul class="rows">
+          <li v-for="w in savedPalabras" :key="w.id" class="fav">
+            <figure class="word">
+              <blockquote>«{{ w.texto }}»</blockquote>
+              <figcaption>{{ w.cita }}</figcaption>
+            </figure>
+            <button class="fav__remove" :aria-label="`Quitar ${w.cita} de guardadas`" @click="toggleSaved(w.id)">
+              <AppIcon name="bookmark" filled :size="22" />
+            </button>
+          </li>
+        </ul>
+      </section>
     </ClientOnly>
 
     <ReadingSettings v-model="showSettings" />
@@ -100,6 +116,27 @@ const showSettings = ref(false)
   place-items: center;
   color: var(--gold);
   flex: none;
+}
+
+.word {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0.9rem 0.25rem;
+}
+
+.word blockquote {
+  margin: 0;
+  font-family: var(--font-text);
+  font-size: calc(1.08rem * var(--reading-scale));
+  line-height: 1.45;
+}
+
+.word figcaption {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gold);
 }
 
 .empty {

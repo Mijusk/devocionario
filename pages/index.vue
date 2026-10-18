@@ -56,6 +56,8 @@ const stars = [
       </div>
     </section>
 
+    <PalabraDeVida />
+
     <section>
       <h2 class="section-title">El Rosario de hoy</h2>
       <NuxtLink :to="mounted ? `/rosario?m=${set.slug}` : '/rosario'" class="rosary">

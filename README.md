@@ -17,6 +17,7 @@ npm run generate   # sitio estático en .output/public
 ## Qué tiene
 
 - **Hoy**: sugiere la oración del momento según la hora (mañana, Ángelus o Regina Coeli en tiempo pascual, Coronilla a las tres, Rosario por la tarde, oración de la noche), los misterios del día y lo que estabas rezando.
+- **Palabra de vida**: en Hoy, un botón saca al azar un versículo breve (184, por temas). No se repite hasta que han salido todos, se mantiene durante el día y se puede guardar o compartir.
 - **Oraciones**: siete secciones y buscador que ignora tildes («angel» encuentra «Ángelus»).
 - **Rosario**: elige los misterios (marcados los de hoy) y reza paso a paso; se toca la tarjeta para contar cada Avemaría.
 - **Oraciones guiadas**: Santa Brígida (12 años y 15 oraciones) y la Coronilla de la Divina Misericordia, con pasos, gestos de deslizar y memoria del paso en que te quedaste.
@@ -51,6 +52,8 @@ Las oraciones están en `data/prayers/*.ts`, una sección por archivo. Cada una 
 
 Los misterios del Rosario están en `data/rosary.ts`.
 
+Las palabras de vida están en `data/palabras.ts`, una por línea: `['Jn 15, 9', 'Como el Padre me ha amado…', 'amor']`.
+
 ## Estructura
 
 ```
@@ -62,5 +65,8 @@ pages/         Hoy, Oraciones, sección, oración, Rosario, Guardadas
 ```
 
 ## Sobre los textos
+
+Las palabras de vida siguen la Sagrada Biblia, versión oficial de la Conferencia Episcopal Española, cuyos textos tienen derechos. Antes de publicar la web en abierto conviene revisar sus condiciones de uso.
+
 
 Las oraciones tradicionales (Padre Nuestro, Salve, Ángelus, Acordaos…) siguen las versiones de uso común en España. Las devociones de Santa Brígida, las oraciones de la vida cristiana y las de los santos proceden del devocionario personal del autor, revisadas y corregidas.
