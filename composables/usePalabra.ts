@@ -51,5 +51,17 @@ export function usePalabra() {
   return { today, draw, isSaved, toggleSaved, savedPalabras }
 }
 
-/** Texto listo para compartir por WhatsApp, Telegram… */
-export const palabraParaCompartir = (p: Palabra) => `«${p.texto}» (${p.cita})`
+/** Dirección pública de la web, para invitar a sacar otra palabra. */
+export const SITE_URL = 'https://devocionario-one.vercel.app/'
+
+/**
+ * Texto listo para compartir por WhatsApp, Telegram…
+ *
+ *   «Porque eres precioso a mis ojos…»
+ *   Is 43, 4
+ *
+ *   Saca tu palabra de vida y reza en el Devocionario:
+ *   https://devocionario-one.vercel.app/
+ */
+export const palabraParaCompartir = (p: Palabra) =>
+  `«${p.texto}»\n${p.cita}\n\nSaca tu palabra de vida y reza en el Devocionario:\n${SITE_URL}`
