@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { prayersBySlug } from '~/data'
+import type { PrayerLink } from '~/composables/useMyPrayers'
 
 useHead({ title: 'Guardadas · Devocionario' })
 
 const { favorites, toggle } = useFavorites()
-const list = computed(() => favorites.value.map((s) => prayersBySlug[s]).filter((p) => !!p))
+const { resolve } = usePrayerLinks()
+const list = computed(() => favorites.value.map(resolve).filter((p): p is PrayerLink => !!p))
 const { active, daysFor, doneToday, toggleToday, streak } = useTracking()
 const tracked = computed(() => active.value.map((s) => prayersBySlug[s]).filter((p) => !!p))
 const showSettings = ref(false)
@@ -32,7 +34,7 @@ const backupSection = ref<{ save: () => Promise<void> } | null>(null)
 
       <ul v-if="list.length" class="rows">
         <li v-for="p in list" :key="p.slug" class="fav">
-          <NuxtLink :to="`/oracion/${p.slug}`" class="row">
+          <NuxtLink :to="p.to" class="row">
             <span class="row__body">
               <span class="row__title">{{ p.title }}</span>
               <span v-if="p.summary" class="row__summary">{{ p.summary }}</span>

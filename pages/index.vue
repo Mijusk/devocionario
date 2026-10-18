@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { prayersBySlug, epigraph } from '~/data'
+import type { PrayerLink } from '~/composables/useMyPrayers'
 import { mysterySetForDay } from '~/data/rosary'
 
 useHead({ title: 'Devocionario' })
@@ -13,9 +14,15 @@ const today = computed(() => longDate(now.value))
 const set = computed(() => mysterySetForDay(now.value.getDay()))
 
 const recent = useRecent()
-const recentPrayer = computed(() => (recent.value ? prayersBySlug[recent.value.slug] : undefined))
+const { resolve } = usePrayerLinks()
+const recentPrayer = computed(() => (recent.value ? resolve(recent.value.slug) : undefined))
 const { favorites } = useFavorites()
-const favPrayers = computed(() => favorites.value.map((s) => prayersBySlug[s]).filter(Boolean).slice(0, 5))
+const favPrayers = computed(() =>
+  favorites.value
+    .map(resolve)
+    .filter((p): p is PrayerLink => !!p)
+    .slice(0, 5),
+)
 const { active, daysFor, doneToday, streak } = useTracking()
 const tracked = computed(() => active.value.map((s) => prayersBySlug[s]).filter(Boolean))
 
@@ -74,7 +81,7 @@ const stars = [
       <h2 class="section-title">Seguir rezando</h2>
       <ul class="rows">
         <li>
-          <NuxtLink :to="`/oracion/${recentPrayer.slug}`" class="row">
+          <NuxtLink :to="recentPrayer.to" class="row">
             <span class="row__body">
               <span class="row__title">{{ recentPrayer.title }}</span>
               <span v-if="recentPrayer.summary" class="row__summary">{{ recentPrayer.summary }}</span>
@@ -108,10 +115,10 @@ const stars = [
     <section>
       <h2 class="section-title">Guardadas</h2>
       <ul v-if="mounted && favPrayers.length" class="rows">
-        <li v-for="p in favPrayers" :key="p!.slug">
-          <NuxtLink :to="`/oracion/${p!.slug}`" class="row">
+        <li v-for="p in favPrayers" :key="p.slug">
+          <NuxtLink :to="p.to" class="row">
             <span class="row__body">
-              <span class="row__title">{{ p!.title }}</span>
+              <span class="row__title">{{ p.title }}</span>
             </span>
             <AppIcon name="chevron-right" :size="18" class="row__icon" />
           </NuxtLink>

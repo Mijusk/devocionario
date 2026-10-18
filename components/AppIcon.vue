@@ -42,6 +42,8 @@ const icons: Record<IconName, IconDef> = {
   check: { paths: ['M5 12.5l4.5 4.5L19 7.5'] },
   close: { paths: ['M6 6l12 12', 'M18 6 6 18'] },
   clock: { paths: ['M12 7.5V12l3 2'], circles: [[12, 12, 9]] },
+  plus: { paths: ['M12 5v14', 'M5 12h14'] },
+  edit: { paths: ['M4 20h4L19 9l-4-4L4 16z', 'M13.5 6.5l4 4'] },
 }
 
 const def = computed(() => icons[props.name])

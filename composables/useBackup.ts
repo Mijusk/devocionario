@@ -1,4 +1,5 @@
 import type { Settings } from './useDevotion'
+import { isMyPrayer, mergeMyPrayers, type MyPrayer } from '~/utils/myPrayer'
 
 /**
  * Copia de seguridad de lo que el usuario guarda en este navegador.
@@ -17,6 +18,8 @@ export interface BackupFile {
   favorites: string[]
   tracking: Record<string, string[]>
   palabras: string[]
+  /** Oraciones escritas por el usuario (desde la versión con «Mis oraciones»). */
+  mine?: MyPrayer[]
   settings?: Partial<Settings>
 }
 
@@ -24,6 +27,7 @@ export interface RestoreSummary {
   favorites: number
   days: number
   palabras: number
+  mine: number
 }
 
 const union = (a: string[], b: string[]) => [...a, ...b.filter((x) => !a.includes(x))]
@@ -57,13 +61,14 @@ export function parseBackup(raw: string): BackupFile {
     favorites: isStringArray(data.favorites) ? data.favorites : [],
     tracking,
     palabras: isStringArray(data.palabras) ? data.palabras : [],
+    mine: Array.isArray(data.mine) ? data.mine.filter(isMyPrayer) : [],
     settings: data.settings && typeof data.settings === 'object' ? data.settings : undefined,
   }
 }
 
 /** Combina una copia con los datos actuales, sin perder nada de ninguno de los dos. */
 export function mergeBackup(
-  current: { favorites: string[]; tracking: Record<string, string[]>; palabras: string[] },
+  current: { favorites: string[]; tracking: Record<string, string[]>; palabras: string[]; mine: MyPrayer[] },
   backup: BackupFile,
 ) {
   const tracking = { ...current.tracking }
@@ -76,14 +81,17 @@ export function mergeBackup(
   }
   const favorites = union(current.favorites, backup.favorites)
   const palabras = union(current.palabras, backup.palabras)
+  const mine = mergeMyPrayers(current.mine, backup.mine ?? [])
   return {
     favorites,
     tracking,
     palabras,
+    mine: mine.list,
     added: {
       favorites: favorites.length - current.favorites.length,
       days,
       palabras: palabras.length - current.palabras.length,
+      mine: mine.added,
     } satisfies RestoreSummary,
   }
 }
@@ -97,6 +105,7 @@ export function useBackup() {
   const { log: tracking } = useTracking()
   const palabras = useLocalState<string[]>('palabras-guardadas', () => [])
   const settings = useSettings()
+  const { list: mine } = useMyPrayers()
   const meta = useLocalState<{ lastBackupAt: string | null }>('backup', () => ({ lastBackupAt: null }))
 
   /** ¿Hay algo que merezca la pena guardar? */
@@ -104,6 +113,7 @@ export function useBackup() {
     () =>
       favorites.value.length > 0 ||
       palabras.value.length > 0 ||
+      mine.value.length > 0 ||
       Object.values(tracking.value).some((d) => d.length > 0),
   )
 
@@ -114,6 +124,7 @@ export function useBackup() {
     favorites: favorites.value,
     tracking: tracking.value,
     palabras: palabras.value,
+    mine: mine.value,
     settings: { ...settings.value },
   })
 
@@ -155,9 +166,10 @@ export function useBackup() {
   const restore = async (file: File): Promise<RestoreSummary> => {
     const backup = parseBackup(await file.text())
     const merged = mergeBackup(
-      { favorites: favorites.value, tracking: tracking.value, palabras: palabras.value },
+      { favorites: favorites.value, tracking: tracking.value, palabras: palabras.value, mine: mine.value },
       backup,
     )
+    mine.value = merged.mine
     favorites.value = merged.favorites
     tracking.value = merged.tracking
     palabras.value = merged.palabras

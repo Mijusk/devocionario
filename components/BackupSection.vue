@@ -36,7 +36,8 @@ const onPick = async (e: Event) => {
   try {
     const added = await restore(file)
     const parts = [
-      added.favorites && plural(added.favorites, 'oración', 'oraciones'),
+      added.mine && plural(added.mine, 'oración tuya', 'oraciones tuyas'),
+      added.favorites && plural(added.favorites, 'oración guardada', 'oraciones guardadas'),
       added.days && plural(added.days, 'día rezado', 'días rezados'),
       added.palabras && plural(added.palabras, 'palabra de vida', 'palabras de vida'),
     ].filter(Boolean)
@@ -58,7 +59,7 @@ defineExpose({ save: onSave })
   <section id="copia" class="backup" aria-labelledby="backup-title">
     <h2 id="backup-title" class="section-title">Copia de seguridad</h2>
     <p class="backup__text">
-      Lo que guardas vive en este móvil. Haz una copia para no perderlo si cambias de móvil o borras los datos del navegador.
+      Lo que guardas y las oraciones que escribes viven en este móvil. Haz una copia para no perderlo si cambias de móvil o borras los datos del navegador.
       Al restaurarla se suma a lo que ya tengas, no se borra nada.
     </p>
     <p class="backup__last">{{ lastLabel }}</p>
@@ -69,7 +70,7 @@ defineExpose({ save: onSave })
       <input ref="fileInput" type="file" accept=".json,application/json" class="visually-hidden" tabindex="-1" @change="onPick" />
     </div>
 
-    <p v-if="!hasData" class="backup__hint">Cuando guardes oraciones o anotes días rezados, podrás hacer una copia.</p>
+    <p v-if="!hasData" class="backup__hint">Cuando guardes o escribas oraciones, o anotes días rezados, podrás hacer una copia.</p>
     <p v-if="message" class="backup__msg" :class="`is-${message.kind}`" role="status">{{ message.text }}</p>
   </section>
 </template>

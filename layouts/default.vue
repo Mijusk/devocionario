@@ -5,7 +5,7 @@ const route = useRoute()
 
 const items: { to: string; label: string; icon: IconName; match: (p: string) => boolean }[] = [
   { to: '/', label: 'Hoy', icon: 'home', match: (p) => p === '/' },
-  { to: '/explorar', label: 'Oraciones', icon: 'compass', match: (p) => p.startsWith('/explorar') || p.startsWith('/oracion') },
+  { to: '/explorar', label: 'Oraciones', icon: 'compass', match: (p) => p.startsWith('/explorar') || p.startsWith('/oracion') || p.startsWith('/mis-oraciones') },
   { to: '/rosario', label: 'Rosario', icon: 'beads', match: (p) => p.startsWith('/rosario') },
   { to: '/guardadas', label: 'Guardadas', icon: 'bookmark', match: (p) => p.startsWith('/guardadas') },
 ]

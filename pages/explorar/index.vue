@@ -1,12 +1,26 @@
 <script setup lang="ts">
 import { prayers, categories } from '~/data'
+import { firstLine } from '~/utils/myPrayer'
 
 useHead({ title: 'Oraciones · Devocionario' })
 
 const route = useRoute()
 const router = useRouter()
 const query = ref(String(route.query.q ?? ''))
-const results = computed(() => searchPrayers(prayers, query.value))
+const { sorted: mine } = useMyPrayers()
+
+/** Resultados: primero tus oraciones, luego las de la web. */
+const results = computed(() => {
+  const words = normalize(query.value).split(/\s+/).filter(Boolean)
+  const own = mine.value
+    .filter((m) => {
+      const hay = normalize(`${m.title} ${m.author ?? ''} ${m.text}`)
+      return words.length && words.every((w) => hay.includes(w))
+    })
+    .map((m) => ({ key: m.id, title: m.title, summary: firstLine(m.text), to: myPrayerUrl(m.id), mine: true }))
+  const web = searchPrayers(prayers, query.value).map((p) => ({ key: p.slug, title: p.title, summary: p.summary, to: `/oracion/${p.slug}`, mine: false }))
+  return [...own, ...web]
+})
 const searching = computed(() => query.value.trim().length > 0)
 
 const countIn = (slug: string) => prayers.filter((p) => p.category === slug).length
@@ -42,12 +56,13 @@ watch(query, (q) => {
         {{ results.length ? `${results.length} ${results.length === 1 ? 'oración' : 'oraciones'}` : 'Ninguna oración contiene esas palabras' }}
       </p>
       <ul v-if="results.length" class="rows">
-        <li v-for="p in results" :key="p.slug">
-          <NuxtLink :to="`/oracion/${p.slug}`" class="row">
+        <li v-for="p in results" :key="p.key">
+          <NuxtLink :to="p.to" class="row">
             <span class="row__body">
               <span class="row__title">{{ p.title }}</span>
               <span v-if="p.summary" class="row__summary">{{ p.summary }}</span>
             </span>
+            <span v-if="p.mine" class="mine-badge">Tuya</span>
           </NuxtLink>
         </li>
       </ul>
@@ -55,6 +70,31 @@ watch(query, (q) => {
     </section>
 
     <section v-else>
+      <ClientOnly>
+        <h2 class="section-title mine-title">Mis oraciones</h2>
+        <ul class="rows mine">
+          <li v-for="m in mine" :key="m.id">
+            <NuxtLink :to="myPrayerUrl(m.id)" class="row">
+              <span class="row__body">
+                <span class="row__title">{{ m.title }}</span>
+                <span class="row__summary">{{ firstLine(m.text) }}</span>
+              </span>
+              <AppIcon name="chevron-right" :size="18" class="row__icon" />
+            </NuxtLink>
+          </li>
+          <li>
+            <NuxtLink :to="myPrayerEditUrl()" class="row row--new">
+              <span class="cat-icon cat-icon--new"><AppIcon name="plus" :size="22" /></span>
+              <span class="row__body">
+                <span class="row__title">Nueva oración</span>
+                <span v-if="!mine.length" class="row__summary">Escribe tus propias oraciones y tenlas siempre a mano.</span>
+              </span>
+            </NuxtLink>
+          </li>
+        </ul>
+        <h2 class="section-title">Del devocionario</h2>
+      </ClientOnly>
+
       <ul class="rows cats">
         <li v-for="c in categories" :key="c.slug">
           <NuxtLink :to="`/explorar/${c.slug}`" class="row">
@@ -143,6 +183,27 @@ watch(query, (q) => {
   color: var(--gold);
   border: 1px solid var(--gold-soft);
   border-radius: 50%;
+}
+
+.mine-title {
+  margin-top: 0.5rem;
+}
+
+.cat-icon--new {
+  border-style: dashed;
+}
+
+.row--new .row__title {
+  color: var(--lapis);
+}
+
+.mine-badge {
+  flex: none;
+  font-size: 0.8rem;
+  color: var(--gold);
+  border: 1px solid var(--gold-soft);
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
 }
 
 .count {

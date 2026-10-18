@@ -65,6 +65,8 @@ export type IconName =
   | 'check'
   | 'close'
   | 'clock'
+  | 'plus'
+  | 'edit'
 
 export interface Category {
   slug: CategorySlug
