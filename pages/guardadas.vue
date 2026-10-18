@@ -9,6 +9,8 @@ const { active, daysFor, doneToday, toggleToday, streak } = useTracking()
 const tracked = computed(() => active.value.map((s) => prayersBySlug[s]).filter((p) => !!p))
 const showSettings = ref(false)
 const { savedPalabras, toggleSaved } = usePalabra()
+const { reminder } = useBackup()
+const backupSection = ref<{ save: () => Promise<void> } | null>(null)
 </script>
 
 <template>
@@ -22,6 +24,12 @@ const { savedPalabras, toggleSaved } = usePalabra()
     </header>
 
     <ClientOnly>
+      <div v-if="reminder" class="reminder" role="note">
+        <AppIcon name="clock" :size="20" class="reminder__icon" />
+        <p>{{ reminder }}</p>
+        <button class="reminder__btn" @click="backupSection?.save()">Hacer copia</button>
+      </div>
+
       <ul v-if="list.length" class="rows">
         <li v-for="p in list" :key="p.slug" class="fav">
           <NuxtLink :to="`/oracion/${p.slug}`" class="row">
@@ -80,6 +88,8 @@ const { savedPalabras, toggleSaved } = usePalabra()
           </li>
         </ul>
       </section>
+
+      <BackupSection ref="backupSection" />
     </ClientOnly>
 
     <ReadingSettings v-model="showSettings" />
@@ -116,6 +126,36 @@ const { savedPalabras, toggleSaved } = usePalabra()
   place-items: center;
   color: var(--gold);
   flex: none;
+}
+
+.reminder {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: -0.5rem 0 1.25rem;
+  padding: 0.7rem 0.6rem 0.7rem 0.85rem;
+  border: 1px solid var(--gold-soft);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.reminder p {
+  flex: 1;
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.reminder__icon {
+  flex: none;
+  color: var(--gold);
+}
+
+.reminder__btn {
+  flex: none;
+  font-weight: 700;
+  color: var(--lapis);
+  padding: 0.5rem 0.4rem;
 }
 
 .word {
