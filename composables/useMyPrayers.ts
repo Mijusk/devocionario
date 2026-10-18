@@ -1,5 +1,5 @@
 import { prayersBySlug } from '~/data'
-import { firstLine, isMine, newMyPrayerId, type MyPrayer } from '~/utils/myPrayer'
+import { cleanFolder, firstLine, isMine, newMyPrayerId, sameFolder, type MyPrayer } from '~/utils/myPrayer'
 import { SITE_URL } from './usePalabra'
 
 /** Oraciones escritas por el usuario. */
@@ -10,14 +10,43 @@ export function useMyPrayers() {
   const sorted = computed(() => [...list.value].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)))
   const get = (id: string) => list.value.find((p) => p.id === id)
 
+  /** Carpetas existentes, en orden alfabético. */
+  const folders = computed(() => {
+    const names: string[] = []
+    for (const p of list.value) {
+      if (p.folder && !names.some((n) => sameFolder(n, p.folder))) names.push(p.folder)
+    }
+    return names.sort((a, b) => a.localeCompare(b, 'es'))
+  })
+
+  /** Si ya existe una carpeta con ese nombre (sin contar mayúsculas ni tildes), usa su grafía. */
+  const canonicalFolder = (name?: string) => {
+    const clean = cleanFolder(name)
+    return clean ? folders.value.find((f) => sameFolder(f, clean)) ?? clean : undefined
+  }
+
+  /** Oraciones agrupadas: primero las carpetas (A-Z), después las que no tienen. */
+  const grouped = computed(() => ({
+    folders: folders.value.map((name) => ({ name, prayers: sorted.value.filter((p) => sameFolder(p.folder, name)) })),
+    loose: sorted.value.filter((p) => !p.folder),
+  }))
+
+  /** Cambia el nombre de una carpeta en todas sus oraciones (o las une a otra existente). */
+  const renameFolder = (from: string, to: string) => {
+    const target = canonicalFolder(to)
+    list.value = list.value.map((p) => (sameFolder(p.folder, from) ? { ...p, folder: target } : p))
+    return target
+  }
+
   /** Crea o actualiza. Devuelve el id. */
-  const save = (data: Pick<MyPrayer, 'title' | 'text' | 'author' | 'note'>, id?: string) => {
+  const save = (data: Pick<MyPrayer, 'title' | 'text' | 'author' | 'note' | 'folder'>, id?: string) => {
     const now = new Date().toISOString()
     const clean = {
       title: data.title.trim(),
       text: data.text.replace(/\s+$/, ''),
       author: data.author?.trim() || undefined,
       note: data.note?.trim() || undefined,
+      folder: canonicalFolder(data.folder),
     }
     const existing = id ? get(id) : undefined
     if (existing) {
@@ -38,7 +67,7 @@ export function useMyPrayers() {
     if (recent.value?.slug === id) recent.value = null
   }
 
-  return { list, sorted, get, save, remove }
+  return { list, sorted, folders, grouped, get, save, remove, renameFolder }
 }
 
 export interface PrayerLink {
@@ -63,8 +92,13 @@ export function usePrayerLinks() {
 }
 
 export const myPrayerUrl = (id: string) => `/mis-oraciones/ver?id=${encodeURIComponent(id)}`
-export const myPrayerEditUrl = (id?: string) =>
-  id ? `/mis-oraciones/editar?id=${encodeURIComponent(id)}` : '/mis-oraciones/editar'
+/** Editar una oración, o crear una nueva (opcionalmente ya dentro de una carpeta). */
+export const myPrayerEditUrl = (id?: string, folder?: string) =>
+  id
+    ? `/mis-oraciones/editar?id=${encodeURIComponent(id)}`
+    : folder
+      ? `/mis-oraciones/editar?carpeta=${encodeURIComponent(folder)}`
+      : '/mis-oraciones/editar'
 
 /** Texto completo para compartir: la oración solo existe en este móvil. */
 export const myPrayerParaCompartir = (p: MyPrayer) =>

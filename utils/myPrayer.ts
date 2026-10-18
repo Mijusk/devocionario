@@ -7,6 +7,8 @@ export interface MyPrayer {
   text: string
   author?: string
   note?: string
+  /** Carpeta en la que se agrupa (opcional). */
+  folder?: string
   createdAt: string
   updatedAt: string
 }
@@ -14,6 +16,12 @@ export interface MyPrayer {
 export const MY_PREFIX = 'mia-'
 export const isMine = (slug: string) => slug.startsWith(MY_PREFIX)
 export const newMyPrayerId = () => `${MY_PREFIX}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+
+/** Nombre de carpeta limpio: sin espacios sobrantes; vacío = sin carpeta. */
+export const cleanFolder = (name?: string) => name?.replace(/\s+/g, ' ').trim() || undefined
+
+/** Para comparar carpetas sin distinguir mayúsculas ni tildes. */
+export const sameFolder = (a?: string, b?: string) => !!a && !!b && norm(a) === norm(b)
 
 /** Línea que inserta el botón del editor. */
 export const BASICS_LINE = 'Padre Nuestro, Avemaría y Gloria'
@@ -108,6 +116,7 @@ export function isMyPrayer(v: unknown): v is MyPrayer {
     isMine(p.id) &&
     typeof p.title === 'string' &&
     typeof p.text === 'string' &&
+    (p.folder === undefined || typeof p.folder === 'string') &&
     typeof p.updatedAt === 'string'
   )
 }

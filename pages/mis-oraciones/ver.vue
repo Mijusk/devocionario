@@ -52,7 +52,7 @@ const share = async () => {
 
 <template>
   <div class="page">
-    <TopBar title="Mis oraciones" back="/explorar">
+    <TopBar :title="prayer?.folder ?? 'Mis oraciones'" back="/mis-oraciones">
       <template v-if="prayer">
         <button :aria-pressed="isFavorite(prayer.id)" :aria-label="isFavorite(prayer.id) ? 'Quitar de guardadas' : 'Guardar'" @click="toggle(prayer.id)">
           <AppIcon name="bookmark" :filled="isFavorite(prayer.id)" />
@@ -83,7 +83,7 @@ const share = async () => {
 
     <div v-else-if="mounted && notFound" class="missing">
       <p>Esta oración no está en este móvil. Las oraciones que escribes se guardan solo en el dispositivo donde las creas; para pasarlas a otro, usa la copia de seguridad de Guardadas.</p>
-      <NuxtLink to="/explorar" class="btn">Ver mis oraciones</NuxtLink>
+      <NuxtLink to="/mis-oraciones" class="btn">Ver mis oraciones</NuxtLink>
     </div>
 
     <p v-if="shareNote" class="toast" role="status">{{ shareNote }}</p>

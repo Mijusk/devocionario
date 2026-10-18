@@ -18,7 +18,7 @@ npm run generate   # sitio estático en .output/public
 
 - **Hoy**: sugiere la oración del momento según la hora (mañana, Ángelus o Regina Coeli en tiempo pascual, Coronilla a las tres, Rosario por la tarde, oración de la noche), los misterios del día y lo que estabas rezando.
 - **Palabra de vida**: en Hoy, un botón saca al azar un versículo breve (184, por temas). No se repite hasta que han salido todos, se mantiene durante el día y se puede guardar o compartir.
-- **Mis oraciones**: en Oraciones, escribe las tuyas (título, texto y, si quieres, autor y nota). Una línea con «Padre Nuestro, Avemaría y Gloria», «Credo» o «3 Avemarías» se convierte en enlaces que se despliegan. Se leen como las demás, se pueden guardar, compartir (el texto completo) y editar, y van en la copia de seguridad.
+- **Mis oraciones**: una fila en Oraciones que abre tu propia sección: «Nueva oración» arriba y tus oraciones agrupadas en carpetas plegables (se eligen o crean al escribir la oración, y se pueden renombrar). Cada una lleva título, texto y, si quieres, autor y nota. Una línea con «Padre Nuestro, Avemaría y Gloria», «Credo» o «3 Avemarías» se convierte en enlaces que se despliegan. Se leen como las demás, se pueden guardar, compartir (el texto completo) y editar, y van en la copia de seguridad.
 - **Oraciones**: siete secciones y buscador que ignora tildes («angel» encuentra «Ángelus»).
 - **Rosario**: elige los misterios (marcados los de hoy) y reza paso a paso; se toca la tarjeta para contar cada Avemaría.
 - **Oraciones guiadas**: Santa Brígida (12 años y 15 oraciones) y la Coronilla de la Divina Misericordia, con pasos, gestos de deslizar y memoria del paso en que te quedaste.

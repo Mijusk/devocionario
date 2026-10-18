@@ -7,7 +7,12 @@ useHead({ title: 'Oraciones · Devocionario' })
 const route = useRoute()
 const router = useRouter()
 const query = ref(String(route.query.q ?? ''))
-const { sorted: mine } = useMyPrayers()
+const { sorted: mine, folders } = useMyPrayers()
+const mineSummary = computed(() => {
+  if (!mine.value.length) return 'Escribe y guarda tus propias oraciones.'
+  const n = folders.value.length
+  return n ? `${n} ${n === 1 ? 'carpeta' : 'carpetas'}` : 'Las que has escrito tú.'
+})
 
 /** Resultados: primero tus oraciones, luego las de la web. */
 const results = computed(() => {
@@ -70,30 +75,23 @@ watch(query, (q) => {
     </section>
 
     <section v-else>
-      <ClientOnly>
-        <h2 class="section-title mine-title">Mis oraciones</h2>
-        <ul class="rows mine">
-          <li v-for="m in mine" :key="m.id">
-            <NuxtLink :to="myPrayerUrl(m.id)" class="row">
-              <span class="row__body">
-                <span class="row__title">{{ m.title }}</span>
-                <span class="row__summary">{{ firstLine(m.text) }}</span>
+      <ul class="rows mine">
+        <li>
+          <NuxtLink to="/mis-oraciones" class="row">
+            <span class="cat-icon cat-icon--mine"><AppIcon name="edit" :size="21" /></span>
+            <span class="row__body">
+              <span class="row__title">Mis oraciones</span>
+              <span class="row__summary">
+                <ClientOnly>
+                  {{ mineSummary }}
+                  <template #fallback>Escribe y guarda tus propias oraciones.</template>
+                </ClientOnly>
               </span>
-              <AppIcon name="chevron-right" :size="18" class="row__icon" />
-            </NuxtLink>
-          </li>
-          <li>
-            <NuxtLink :to="myPrayerEditUrl()" class="row row--new">
-              <span class="cat-icon cat-icon--new"><AppIcon name="plus" :size="22" /></span>
-              <span class="row__body">
-                <span class="row__title">Nueva oración</span>
-                <span v-if="!mine.length" class="row__summary">Escribe tus propias oraciones y tenlas siempre a mano.</span>
-              </span>
-            </NuxtLink>
-          </li>
-        </ul>
-        <h2 class="section-title">Del devocionario</h2>
-      </ClientOnly>
+            </span>
+            <ClientOnly><span v-if="mine.length" class="count">{{ mine.length }}</span></ClientOnly>
+          </NuxtLink>
+        </li>
+      </ul>
 
       <ul class="rows cats">
         <li v-for="c in categories" :key="c.slug">
@@ -185,16 +183,14 @@ watch(query, (q) => {
   border-radius: 50%;
 }
 
-.mine-title {
-  margin-top: 0.5rem;
+.mine {
+  margin-bottom: 1.25rem;
 }
 
-.cat-icon--new {
-  border-style: dashed;
-}
-
-.row--new .row__title {
-  color: var(--lapis);
+.cat-icon--mine {
+  background: var(--lapis);
+  border-color: var(--lapis);
+  color: var(--vellum);
 }
 
 .mine-badge {

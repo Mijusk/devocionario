@@ -4,14 +4,38 @@ import { BASICS_LINE, textToBlocks } from '~/utils/myPrayer'
 /** Crear (sin ?id) o editar (con ?id) una oración propia. */
 const route = useRoute()
 const router = useRouter()
-const { get, save, remove } = useMyPrayers()
+const { get, save, remove, folders } = useMyPrayers()
 
 const id = computed(() => (typeof route.query.id === 'string' ? route.query.id : undefined))
 const editing = computed(() => !!id.value)
 
 useHead(() => ({ title: `${editing.value ? 'Editar oración' : 'Nueva oración'} · Devocionario` }))
 
-const form = reactive({ title: '', text: '', author: '', note: '' })
+const form = reactive({ title: '', text: '', author: '', note: '', folder: '' })
+
+// Carpeta: se elige entre las existentes o se escribe una nueva.
+const creatingFolder = ref(false)
+const folderDraft = ref('')
+const chooseFolder = (name: string) => {
+  form.folder = name
+  creatingFolder.value = false
+}
+const startNewFolder = () => {
+  creatingFolder.value = true
+  folderDraft.value = ''
+  nextTick(() => document.getElementById('folder-input')?.focus())
+}
+const confirmNewFolder = () => {
+  const name = folderDraft.value.replace(/\s+/g, ' ').trim()
+  if (name) form.folder = name
+  creatingFolder.value = false
+}
+/** Carpetas para elegir: las existentes y, si es nueva, la que se acaba de escribir. */
+const folderOptions = computed(() => {
+  const list = [...folders.value]
+  if (form.folder && !list.some((f) => f.toLowerCase() === form.folder.toLowerCase())) list.push(form.folder)
+  return list
+})
 const loaded = ref(false)
 const notFound = ref(false)
 const showMore = ref(false)
@@ -23,12 +47,13 @@ const confirmDelete = ref(false)
 onMounted(() => {
   const stop = watchEffect(() => {
     if (!editing.value) {
+      if (!loaded.value && typeof route.query.carpeta === 'string') form.folder = route.query.carpeta
       loaded.value = true
       return
     }
     const p = get(id.value!)
     if (p) {
-      Object.assign(form, { title: p.title, text: p.text, author: p.author ?? '', note: p.note ?? '' })
+      Object.assign(form, { title: p.title, text: p.text, author: p.author ?? '', note: p.note ?? '', folder: p.folder ?? '' })
       showMore.value = !!(p.author || p.note)
       loaded.value = true
       nextTick(autosize)
@@ -72,7 +97,7 @@ const showWrite = () => {
   tab.value = 'write'
   nextTick(autosize)
 }
-const cancelTo = computed(() => (id.value ? myPrayerUrl(id.value) : '/explorar'))
+const cancelTo = computed(() => (id.value ? myPrayerUrl(id.value) : '/mis-oraciones'))
 
 const onSave = () => {
   error.value = ''
@@ -90,17 +115,17 @@ const onDelete = () => {
     return
   }
   remove(id.value!)
-  router.replace('/explorar')
+  router.replace('/mis-oraciones')
 }
 </script>
 
 <template>
   <div class="page">
-    <TopBar :title="editing ? 'Editar oración' : 'Nueva oración'" back="/explorar" />
+    <TopBar :title="editing ? 'Editar oración' : 'Nueva oración'" :back="cancelTo" />
 
     <div v-if="notFound" class="missing">
       <p>Esta oración no está en este móvil. Puede que la hayas borrado o que esté guardada en otro dispositivo.</p>
-      <NuxtLink to="/explorar" class="btn">Ver mis oraciones</NuxtLink>
+      <NuxtLink to="/mis-oraciones" class="btn">Ver mis oraciones</NuxtLink>
     </div>
 
     <form v-else-if="loaded" class="editor" novalidate @submit.prevent="onSave">
@@ -143,6 +168,41 @@ const onDelete = () => {
           <p v-else class="help">Aún no has escrito nada.</p>
         </div>
       </div>
+
+      <fieldset class="field folders">
+        <legend class="field__label">Carpeta</legend>
+        <div class="chips">
+          <button type="button" class="chip" :aria-pressed="!form.folder" @click="chooseFolder('')">Sin carpeta</button>
+          <button
+            v-for="f in folderOptions"
+            :key="f"
+            type="button"
+            class="chip"
+            :aria-pressed="form.folder.toLowerCase() === f.toLowerCase()"
+            @click="chooseFolder(f)"
+          >
+            <AppIcon name="folder" :size="16" />
+            {{ f }}
+          </button>
+          <button v-if="!creatingFolder" type="button" class="chip chip--new" @click="startNewFolder">
+            <AppIcon name="plus" :size="16" />
+            Nueva carpeta
+          </button>
+        </div>
+        <div v-if="creatingFolder" class="new-folder">
+          <label for="folder-input" class="visually-hidden">Nombre de la carpeta nueva</label>
+          <input
+            id="folder-input"
+            v-model="folderDraft"
+            type="text"
+            placeholder="Familia, Novenas, Por los difuntos…"
+            maxlength="40"
+            autocomplete="off"
+            @keydown.enter.prevent="confirmNewFolder"
+          />
+          <button type="button" class="btn btn--quiet" @click="confirmNewFolder">Crear</button>
+        </div>
+      </fieldset>
 
       <button type="button" class="more" :aria-expanded="showMore" @click="showMore = !showMore">
         <AppIcon name="chevron-right" :size="16" class="more__chev" />
@@ -281,6 +341,54 @@ textarea:focus {
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--surface);
+}
+
+.folders {
+  border: 0;
+  padding: 0;
+  margin: 0 0 1.25rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 2.4rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--lapis);
+  border-color: var(--lapis);
+  color: var(--vellum);
+}
+
+.chip--new {
+  border-style: dashed;
+  border-color: var(--gold-soft);
+  color: var(--ink-soft);
+}
+
+.new-folder {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.new-folder input {
+  flex: 1;
+  min-width: 0;
 }
 
 .more {
