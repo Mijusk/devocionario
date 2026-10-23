@@ -49,6 +49,8 @@ const items: { to: string; label: string; icon: IconName; match: (p: string) => 
   backdrop-filter: blur(18px) saturate(1.2);
   -webkit-backdrop-filter: blur(18px) saturate(1.2);
   border-top: 1px solid var(--line-soft);
+  /* Capa propia: la barra no parpadea mientras se anima algo debajo. */
+  transform: translateZ(0);
 }
 
 .nav__brand {

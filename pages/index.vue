@@ -317,7 +317,6 @@ const stars = [
   position: relative;
   isolation: isolate;
   color: #f6f1e4;
-  filter: drop-shadow(0 18px 30px rgb(19 39 90 / 0.22));
 }
 
 :root[data-sky='alba'] .ventana {
@@ -361,6 +360,7 @@ const stars = [
   height: 100%;
   z-index: -2;
   overflow: visible;
+  filter: drop-shadow(0 18px 30px rgb(19 39 90 / 0.22));
 }
 
 .sky-1 { stop-color: var(--sky-1); }
@@ -480,6 +480,11 @@ const stars = [
   z-index: 3;
   perspective: 1100px;
   cursor: pointer;
+  /* Las hojas giran dentro del arco: nada se sale de la ventana ni se
+     superpone a la barra de navegación (Safari pinta el 3D por encima). */
+  overflow: hidden;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 150' preserveAspectRatio='none'%3E%3Cpath d='M0 146V58C0 30 22 9 50 0C78 9 100 30 100 58V146Q100 150 96 150H4Q0 150 0 146Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 150' preserveAspectRatio='none'%3E%3Cpath d='M0 146V58C0 30 22 9 50 0C78 9 100 30 100 58V146Q100 150 96 150H4Q0 150 0 146Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
 }
 
 .vidriera__hoja {
@@ -488,6 +493,8 @@ const stars = [
   bottom: 0;
   width: 50%;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform, opacity;
   transition:
     transform 1.6s cubic-bezier(0.42, 0.04, 0.22, 1),
     opacity 0.6s ease 0.95s;
