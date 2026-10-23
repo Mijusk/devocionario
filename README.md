@@ -16,14 +16,14 @@ npm run generate   # sitio estático en .output/public
 
 ## Qué tiene
 
-- **Hoy**: sugiere la oración del momento según la hora (mañana, Ángelus o Regina Coeli en tiempo pascual, Coronilla a las tres, Rosario por la tarde, oración de la noche), los misterios del día y lo que estabas rezando.
+- **Hoy**: una ventana gótica cuyo cielo cambia con la hora (alba, día, atardecer, noche con estrellas), con la fecha, el tiempo litúrgico y su color, y la oración del momento. Debajo, las cinco horas del día (mañana, Ángelus o Regina Coeli, Misericordia, Rosario, noche): la actual va marcada y se puede tocar cualquiera. Luego la palabra de vida, el Rosario de hoy, lo que estabas rezando, las devociones en curso con su progreso y tus guardadas.
 - **Palabra de vida**: en Hoy, un botón saca al azar un versículo breve (568, por temas). No se repite hasta que han salido todos, se mantiene durante el día y se puede guardar o compartir.
 - **Mis oraciones**: una fila en Oraciones que abre tu propia sección: «Nueva oración» arriba y tus oraciones agrupadas en carpetas plegables (se eligen o crean al escribir la oración, y se pueden renombrar). Cada una lleva título, texto y, si quieres, autor y nota. Una línea con «Padre Nuestro, Avemaría y Gloria», «Credo» o «3 Avemarías» se convierte en enlaces que se despliegan. Se leen como las demás, se pueden guardar, compartir (el texto completo) y editar, y van en la copia de seguridad.
 - **Oraciones**: siete secciones y buscador que ignora tildes («angel» encuentra «Ángelus»).
 - **Rosario**: elige los misterios (marcados los de hoy) y reza paso a paso; se toca la tarjeta para contar cada Avemaría.
 - **Oraciones guiadas**: Santa Brígida (12 años y 15 oraciones) y la Coronilla de la Divina Misericordia, con pasos, gestos de deslizar y memoria del paso en que te quedaste.
 - **Seguimiento**: anota los días rezados de las devociones largas y muestra los días seguidos.
-- **Lectura**: cuatro tamaños de letra, tema claro u oscuro, latín en paralelo cuando existe, y la pantalla no se apaga mientras rezas.
+- **Lectura y apariencia** (botón de ajustes en Hoy, en Guardadas y en cada oración): cuatro tamaños de letra, tema según el sistema, claro u oscuro, latín en paralelo cuando existe, y la pantalla no se apaga mientras rezas.
 - **Guardadas**: tus oraciones y palabras a mano. Todo se guarda en el propio navegador, sin cuentas; se pide almacenamiento persistente para que no se borre por falta de espacio.
 - **Copia de seguridad**: en Guardadas, guarda un archivo .json (en el móvil abre el menú de compartir) y restáuralo en otro dispositivo. Al restaurar se combina con lo que haya, nunca se borra nada. Si tienes devociones en curso y no hay copia reciente, aparece un aviso.
 

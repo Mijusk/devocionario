@@ -6,9 +6,9 @@ defineProps<{ hasLatin?: boolean }>()
 const settings = useSettings()
 const sizes = ['Pequeña', 'Normal', 'Grande', 'Muy grande']
 const themes: { value: 'auto' | 'light' | 'dark'; label: string }[] = [
-  { value: 'auto', label: 'Automático' },
+  { value: 'auto', label: 'Sistema' },
   { value: 'light', label: 'Claro' },
-  { value: 'dark', label: 'Noche' },
+  { value: 'dark', label: 'Oscuro' },
 ]
 
 const onKey = (e: KeyboardEvent) => {
@@ -28,7 +28,7 @@ onBeforeUnmount(() => import.meta.client && window.removeEventListener('keydown'
       <div v-if="open" class="scrim" @click.self="open = false">
         <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="rs-title">
           <div class="sheet__head">
-            <h2 id="rs-title">Lectura</h2>
+            <h2 id="rs-title">Lectura y apariencia</h2>
             <button class="sheet__close" aria-label="Cerrar" @click="open = false">
               <AppIcon name="close" />
             </button>
@@ -52,7 +52,7 @@ onBeforeUnmount(() => import.meta.client && window.removeEventListener('keydown'
           </fieldset>
 
           <fieldset class="field">
-            <legend>Tema</legend>
+            <legend>Apariencia</legend>
             <div class="seg">
               <button
                 v-for="t in themes"
@@ -61,9 +61,13 @@ onBeforeUnmount(() => import.meta.client && window.removeEventListener('keydown'
                 :aria-pressed="settings.theme === t.value"
                 @click="settings.theme = t.value"
               >
+                <AppIcon v-if="t.value !== 'auto'" :name="t.value === 'light' ? 'sun' : 'moon'" :size="17" />
                 {{ t.label }}
               </button>
             </div>
+            <p class="field__hint">
+              {{ settings.theme === 'auto' ? 'Sigue el modo claro u oscuro de tu móvil.' : settings.theme === 'dark' ? 'Siempre oscuro, cómodo para rezar de noche.' : 'Siempre claro.' }}
+            </p>
           </fieldset>
 
           <label v-if="hasLatin" class="switch">
@@ -94,7 +98,8 @@ onBeforeUnmount(() => import.meta.client && window.removeEventListener('keydown'
   max-width: 30rem;
   background: var(--surface);
   color: var(--ink);
-  border-radius: 20px 20px 0 0;
+  border-radius: 24px 24px 0 0;
+  border-top: 1px solid var(--line-soft);
   padding: 1rem 1.25rem calc(1.5rem + var(--safe-b));
   box-shadow: 0 -10px 40px rgb(0 0 0 / 0.18);
 }
@@ -117,6 +122,7 @@ onBeforeUnmount(() => import.meta.client && window.removeEventListener('keydown'
 
 .sheet__head h2 {
   font-size: 1.4rem;
+  font-weight: 500;
 }
 
 .sheet__close {
@@ -161,9 +167,19 @@ onBeforeUnmount(() => import.meta.client && window.removeEventListener('keydown'
 }
 
 .seg button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
   height: 2.6rem;
   border-radius: 9px;
   font-weight: 500;
+}
+
+.field__hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-faint);
 }
 
 .is-on {

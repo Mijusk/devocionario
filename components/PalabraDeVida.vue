@@ -79,13 +79,26 @@ const compartir = async () => {
 </template>
 
 <style scoped>
+/* Una hoja: esquinas apenas redondeadas y un filete de oro interior,
+   el mismo que enmarca la ventana de arriba. */
 .palabra__card {
   position: relative;
-  border: 1px solid var(--line);
-  border-radius: 18px;
+  border: 1px solid var(--line-soft);
+  border-radius: 6px;
   background: var(--surface);
+  box-shadow: var(--shadow);
   min-height: 13.5rem;
   overflow: hidden;
+}
+
+.palabra__card::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid var(--gold-soft);
+  border-radius: 3px;
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 /* ── Antes de sacarla: papel doblado con sello ─────────────────────── */
@@ -94,7 +107,7 @@ const compartir = async () => {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 1.5rem 1.25rem 1.4rem;
+  padding: 1.9rem 1.5rem 1.75rem;
 }
 
 .paper {
@@ -141,7 +154,7 @@ const compartir = async () => {
 /* ── Palabra sacada ────────────────────────────────────────────────── */
 .palabra__open {
   margin: 0;
-  padding: 1.4rem 1.25rem 0.75rem;
+  padding: 1.75rem 1.6rem 0.9rem;
   transform-origin: top center;
   animation: unfold 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -160,8 +173,9 @@ const compartir = async () => {
 .palabra__text {
   margin: 0;
   font-family: var(--font-text);
-  font-size: calc(1.4rem * var(--reading-scale));
-  line-height: 1.38;
+  font-size: calc(1.45rem * var(--reading-scale));
+  line-height: 1.4;
+  letter-spacing: -0.005em;
   text-wrap: pretty;
 }
 
@@ -198,8 +212,8 @@ const compartir = async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 0.9rem;
-  border-top: 1px solid var(--line);
+  margin-top: 1.1rem;
+  border-top: 1px solid var(--line-soft);
   padding-top: 0.25rem;
 }
 

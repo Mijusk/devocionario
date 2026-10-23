@@ -20,8 +20,8 @@ const backupSection = ref<{ save: () => Promise<void> } | null>(null)
     <header class="head">
       <h1>Guardadas</h1>
       <button class="btn btn--quiet" @click="showSettings = true">
-        <AppIcon name="type" :size="20" />
-        Lectura
+        <AppIcon name="settings" :size="20" />
+        Ajustes
       </button>
     </header>
 

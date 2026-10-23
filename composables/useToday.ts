@@ -35,25 +35,93 @@ export interface Suggestion {
   to: string
 }
 
-export function suggestionFor(date: Date): Suggestion {
-  const hour = date.getHours()
-  const set = mysterySetForDay(date.getDay())
+export type HourKey = 'manana' | 'mediodia' | 'misericordia' | 'rosario' | 'noche'
 
-  if (hour >= 5 && hour < 11) {
-    return { greeting: 'Buenos días', title: 'Oración de la mañana', reason: 'Empieza el día poniéndolo en manos de Dios.', to: '/oracion/oracion-de-la-manana' }
-  }
-  if (hour >= 11 && hour < 15) {
-    return isEasterTime(date)
-      ? { greeting: 'Buenos días', title: 'Regina Coeli', reason: 'En tiempo pascual, al mediodía se reza el Regina Coeli.', to: '/oracion/regina-coeli' }
-      : { greeting: 'Buenos días', title: 'Ángelus', reason: 'Es mediodía, la hora tradicional del Ángelus.', to: '/oracion/angelus' }
-  }
-  if (hour >= 15 && hour < 16) {
-    return { greeting: 'Buenas tardes', title: 'Coronilla de la Divina Misericordia', reason: 'Las tres de la tarde, la hora de la misericordia.', to: '/oracion/coronilla-divina-misericordia' }
-  }
-  if (hour >= 16 && hour < 21) {
-    return { greeting: 'Buenas tardes', title: 'Santo Rosario', reason: `Hoy tocan los ${set.title.toLowerCase()}.`, to: `/rosario?m=${set.slug}` }
-  }
-  return { greeting: 'Buenas noches', title: 'Oración de la noche', reason: 'Repasa el día y descansa en paz.', to: '/oracion/oracion-de-la-noche' }
+/** Un momento de oración del día, como las horas de un libro de horas. */
+export interface Hour extends Suggestion {
+  key: HourKey
+  /** Nombre corto para la línea de las horas. */
+  name: string
+}
+
+/** Los cinco momentos de oración del día, en orden. */
+export function hoursOfDay(date: Date): Hour[] {
+  const set = mysterySetForDay(date.getDay())
+  const pascua = isEasterTime(date)
+  return [
+    { key: 'manana', name: 'Mañana', greeting: 'Buenos días', title: 'Oración de la mañana', reason: 'Empieza el día poniéndolo en manos de Dios.', to: '/oracion/oracion-de-la-manana' },
+    pascua
+      ? { key: 'mediodia', name: 'Regina Coeli', greeting: 'Buenos días', title: 'Regina Coeli', reason: 'En tiempo pascual, al mediodía se reza el Regina Coeli.', to: '/oracion/regina-coeli' }
+      : { key: 'mediodia', name: 'Ángelus', greeting: 'Buenos días', title: 'Ángelus', reason: 'Al mediodía, la hora tradicional del Ángelus.', to: '/oracion/angelus' },
+    { key: 'misericordia', name: 'Misericordia', greeting: 'Buenas tardes', title: 'Coronilla de la Divina Misericordia', reason: 'A las tres de la tarde, la hora de la misericordia.', to: '/oracion/coronilla-divina-misericordia' },
+    { key: 'rosario', name: 'Rosario', greeting: 'Buenas tardes', title: 'Santo Rosario', reason: `Hoy tocan los ${set.title.toLowerCase()}.`, to: `/rosario?m=${set.slug}` },
+    { key: 'noche', name: 'Noche', greeting: 'Buenas noches', title: 'Oración de la noche', reason: 'Repasa el día y descansa en paz.', to: '/oracion/oracion-de-la-noche' },
+  ]
+}
+
+/** Qué momento del día toca ahora. */
+export function currentHourKey(date: Date): HourKey {
+  const h = date.getHours()
+  if (h >= 5 && h < 11) return 'manana'
+  if (h >= 11 && h < 15) return 'mediodia'
+  if (h >= 15 && h < 16) return 'misericordia'
+  if (h >= 16 && h < 21) return 'rosario'
+  return 'noche'
+}
+
+/** Saludo como se dice en España: «buenas tardes» desde la hora de comer. */
+export function greetingFor(date: Date) {
+  const h = date.getHours()
+  if (h >= 6 && h < 14) return 'Buenos días'
+  if (h >= 14 && h < 21) return 'Buenas tardes'
+  return 'Buenas noches'
+}
+
+export function suggestionFor(date: Date): Suggestion {
+  const key = currentHourKey(date)
+  const { title, reason, to } = hoursOfDay(date).find((h) => h.key === key)!
+  return { greeting: greetingFor(date), title, reason, to }
+}
+
+/** Color del cielo de la ventana de la home según la hora real. */
+export type Sky = 'alba' | 'dia' | 'tarde' | 'noche'
+export function skyFor(date: Date): Sky {
+  const h = date.getHours()
+  if (h >= 6 && h < 9) return 'alba'
+  if (h >= 9 && h < 17) return 'dia'
+  if (h >= 17 && h < 21) return 'tarde'
+  return 'noche'
+}
+
+export type SeasonKey = 'adviento' | 'navidad' | 'cuaresma' | 'semana-santa' | 'pascua' | 'ordinario'
+export interface Season {
+  key: SeasonKey
+  name: string
+  /** Color litúrgico del tiempo. */
+  color: 'morado' | 'blanco' | 'rojo' | 'verde'
+}
+
+const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n)
+
+/** Tiempo litúrgico (calendario romano, con la Epifanía el 6 de enero, como en España). */
+export function liturgicalSeason(date: Date): Season {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const y = d.getFullYear()
+  const easter = easterSunday(y)
+  const christmas = new Date(y, 11, 25)
+  // Adviento: cuatro domingos antes de Navidad.
+  const lastSunday = addDays(christmas, -(christmas.getDay() || 7))
+  const advent = addDays(lastSunday, -21)
+  // Navidad: hasta el Bautismo del Señor, el domingo después de Epifanía.
+  const epiphany = new Date(y, 0, 6)
+  const baptism = addDays(epiphany, 7 - epiphany.getDay())
+
+  if (d >= christmas || d <= baptism) return { key: 'navidad', name: 'Tiempo de Navidad', color: 'blanco' }
+  if (d >= advent) return { key: 'adviento', name: 'Adviento', color: 'morado' }
+  if (d >= addDays(easter, -46) && d < addDays(easter, -7)) return { key: 'cuaresma', name: 'Cuaresma', color: 'morado' }
+  if (d >= addDays(easter, -7) && d < easter) return { key: 'semana-santa', name: 'Semana Santa', color: 'rojo' }
+  if (d >= easter && d <= addDays(easter, 49)) return { key: 'pascua', name: 'Tiempo pascual', color: 'blanco' }
+  return { key: 'ordinario', name: 'Tiempo ordinario', color: 'verde' }
 }
 
 /** Fecha y hora actuales, refrescadas cada minuto (solo en el cliente). */

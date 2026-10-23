@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { prayersBySlug, epigraph } from '~/data'
+import { prayersBySlug } from '~/data'
 import type { PrayerLink } from '~/composables/useMyPrayers'
+import type { HourKey } from '~/composables/useToday'
 import { mysterySetForDay } from '~/data/rosary'
 
 useHead({ title: 'Devocionario' })
@@ -9,9 +10,24 @@ const now = useNow()
 const mounted = ref(false)
 onMounted(() => (mounted.value = true))
 
-const suggestion = computed(() => suggestionFor(now.value))
 const today = computed(() => longDate(now.value))
+const season = computed(() => liturgicalSeason(now.value))
 const set = computed(() => mysterySetForDay(now.value.getDay()))
+const greeting = computed(() => greetingFor(now.value))
+
+// Las cinco horas del día. La que toca ahora va marcada; tocar otra la muestra
+// en la ventana sin salir de la pantalla.
+const hours = computed(() => hoursOfDay(now.value))
+const nowKey = computed(() => currentHourKey(now.value))
+const picked = ref<HourKey | null>(null)
+const shown = computed(() => hours.value.find((h) => h.key === (picked.value ?? nowKey.value))!)
+const pick = (key: HourKey) => (picked.value = key === nowKey.value ? null : key)
+
+// El cielo de la ventana sigue la hora real. El script inicial del <head> ya
+// pone data-sky antes de pintar; aquí solo se mantiene al día.
+watchEffect(() => {
+  if (import.meta.client && mounted.value) document.documentElement.dataset.sky = skyFor(now.value)
+})
 
 const recent = useRecent()
 const { resolve } = usePrayerLinks()
@@ -25,41 +41,94 @@ const favPrayers = computed(() =>
 )
 const { active, daysFor, doneToday, streak } = useTracking()
 const tracked = computed(() => active.value.map((s) => prayersBySlug[s]).filter(Boolean))
+const progress = (slug: string, goal?: number) => (goal ? Math.min(1, daysFor(slug).length / goal) : 0)
 
-// Estrellas del retablo: posiciones fijas, como el cielo de la tabla gótica.
+const showSettings = ref(false)
+
+// La ventana de lo alto: arco apuntado, en unidades de un lienzo de 100 × 150.
+const ARCH = 'M0 146V58C0 30 22 9 50 0C78 9 100 30 100 58V146Q100 150 96 150H4Q0 150 0 146Z'
+const ARCH_IN = 'M3.4 146.6V58.6C3.4 32 24.5 12.4 50 4.2C75.5 12.4 96.6 32 96.6 58.6V146.6Z'
+
+// Estrellas fijas en la parte alta del cielo: [x %, y %, tamaño].
+// Quedan fuera de los textos: en lo alto del arco y en los márgenes.
 const stars = [
-  [8, 14, 1], [22, 6, 0.8], [37, 18, 0.6], [58, 9, 1], [74, 20, 0.7], [90, 12, 0.9],
-  [14, 38, 0.6], [86, 40, 0.7], [6, 66, 0.8], [94, 70, 0.6], [80, 88, 0.9], [18, 90, 0.7],
+  [50, 6.5, 1.1], [39, 11, 0.55], [61, 10.5, 0.75], [30, 16.5, 0.5], [70, 16, 0.8],
+  [10, 27, 0.6], [91, 30, 0.7], [8, 45, 0.5], [92, 48, 0.55], [11, 62, 0.45], [89, 66, 0.5],
 ]
 </script>
 
 <template>
   <div class="page">
-    <section class="retablo" aria-labelledby="hoy-title">
-      <svg class="retablo__stars" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <g v-for="([x, y, s], i) in stars" :key="i" :transform="`translate(${x} ${y}) scale(${s})`">
-          <path d="M0 -2.2 L0.55 -0.55 L2.2 0 L0.55 0.55 L0 2.2 L-0.55 0.55 L-2.2 0 L-0.55 -0.55 Z" />
-        </g>
+    <header class="home-head">
+      <span class="home-head__brand"><span class="home-head__mark" aria-hidden="true">✠</span>Devocionario</span>
+      <button class="home-head__btn" aria-label="Ajustes de lectura y apariencia" @click="showSettings = true">
+        <AppIcon name="settings" :size="22" />
+      </button>
+    </header>
+
+    <section class="ventana" aria-labelledby="hoy-title">
+      <svg class="ventana__glass" viewBox="0 0 100 150" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="ventana-cielo" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" class="sky-1" />
+            <stop offset="0.55" class="sky-2" />
+            <stop offset="1" class="sky-3" />
+          </linearGradient>
+          <radialGradient id="ventana-luz" cx="0.5" cy="1" r="0.8">
+            <stop offset="0" class="glow-1" />
+            <stop offset="1" class="glow-2" />
+          </radialGradient>
+        </defs>
+        <path :d="ARCH" fill="url(#ventana-cielo)" />
+        <path :d="ARCH" fill="url(#ventana-luz)" />
+        <path :d="ARCH_IN" class="ventana__lead" vector-effect="non-scaling-stroke" />
       </svg>
 
-      <div class="retablo__inner">
-        <p class="retablo__date">
+      <div class="ventana__stars" aria-hidden="true">
+        <svg
+          v-for="([x, y, s], i) in stars"
+          :key="i"
+          viewBox="-3 -3 6 6"
+          :style="{ left: `${x}%`, top: `${y}%`, width: `${s * 0.85}rem` }"
+        >
+          <path d="M0 -2.4L.5 -.5L2.4 0L.5 .5L0 2.4L-.5 .5L-2.4 0L-.5 -.5Z" />
+        </svg>
+      </div>
+
+      <div class="ventana__inner">
+        <p class="ventana__date">
           <template v-if="mounted">{{ today }}</template>
           <template v-else>&nbsp;</template>
         </p>
-        <h1 id="hoy-title" class="retablo__greeting">{{ mounted ? suggestion.greeting : 'Paz y bien' }}</h1>
+        <p class="ventana__season">
+          <template v-if="mounted">
+            <span class="season-mark" :data-color="season.color" aria-hidden="true" />{{ season.name }}
+          </template>
+          <template v-else>&nbsp;</template>
+        </p>
 
-        <div class="retablo__now" :class="{ 'is-ready': mounted }">
-          <p class="retablo__label">Para este momento</p>
-          <p class="retablo__prayer">{{ mounted ? suggestion.title : '…' }}</p>
-          <p class="retablo__reason">{{ mounted ? suggestion.reason : '' }}</p>
-          <NuxtLink :to="mounted ? suggestion.to : '/explorar'" class="btn btn--gold retablo__cta">Rezar ahora</NuxtLink>
+        <h1 id="hoy-title" class="ventana__greeting">{{ mounted ? greeting : 'Paz y bien' }}</h1>
+
+        <div class="ventana__now" :class="{ 'is-ready': mounted }" aria-live="polite">
+          <p class="ventana__prayer">{{ mounted ? shown.title : '…' }}</p>
+          <p class="ventana__reason">{{ mounted ? shown.reason : '' }}</p>
+          <NuxtLink :to="mounted ? shown.to : '/explorar'" class="btn btn--gold ventana__cta">Rezar ahora</NuxtLink>
         </div>
 
-        <figure class="retablo__epigraph">
-          <blockquote>{{ epigraph.text }}</blockquote>
-          <figcaption>{{ epigraph.cite }}</figcaption>
-        </figure>
+        <ol class="horas" :class="{ 'is-ready': mounted }" aria-label="Las horas de oración del día">
+          <li v-for="h in hours" :key="h.key">
+            <button
+              class="horas__btn"
+              :class="{ 'is-now': mounted && h.key === nowKey, 'is-shown': mounted && h.key === shown.key }"
+              :aria-pressed="mounted && h.key === shown.key"
+              @click="pick(h.key)"
+            >
+              <span class="horas__dot" aria-hidden="true" />
+              <span class="horas__name">{{ h.name }}</span>
+              <span v-if="mounted && h.key === nowKey" class="visually-hidden">(ahora)</span>
+            </button>
+          </li>
+        </ol>
       </div>
     </section>
 
@@ -68,10 +137,10 @@ const stars = [
     <section>
       <h2 class="section-title">El Rosario de hoy</h2>
       <NuxtLink :to="mounted ? `/rosario?m=${set.slug}` : '/rosario'" class="rosary">
-        <span class="rosary__icon"><AppIcon name="beads" :size="26" /></span>
+        <span class="rosary__icon"><AppIcon name="beads" :size="24" /></span>
         <span class="row__body">
           <span class="row__title">{{ mounted ? set.title : 'Santo Rosario' }}</span>
-          <span class="row__summary">{{ mounted ? `Empieza por ${set.mysteries[0].title.charAt(0).toLowerCase()}${set.mysteries[0].title.slice(1)}.` : 'Guiado, misterio a misterio.' }}</span>
+          <span class="rosary__summary">{{ mounted ? `Empieza por ${set.mysteries[0].title.charAt(0).toLowerCase()}${set.mysteries[0].title.slice(1)}.` : 'Guiado, misterio a misterio.' }}</span>
         </span>
         <AppIcon name="chevron-right" :size="18" class="row__icon" />
       </NuxtLink>
@@ -96,11 +165,14 @@ const stars = [
       <h2 class="section-title">Devociones en curso</h2>
       <ul class="rows">
         <li v-for="p in tracked" :key="p.slug">
-          <NuxtLink :to="`/oracion/${p.slug}`" class="row">
+          <NuxtLink :to="`/oracion/${p.slug}`" class="row devotion">
             <span class="row__body">
               <span class="row__title">{{ p.title }}</span>
               <span class="row__summary">
                 {{ daysFor(p.slug).length }} {{ daysFor(p.slug).length === 1 ? 'día' : 'días' }}<template v-if="p.tracking?.goalDays"> de {{ p.tracking.goalDays }}</template><template v-if="streak(p.slug) > 1">, {{ streak(p.slug) }} seguidos</template>
+              </span>
+              <span v-if="p.tracking?.goalDays" class="devotion__bar" aria-hidden="true">
+                <span :style="{ transform: `scaleX(${progress(p.slug, p.tracking.goalDays)})` }" />
               </span>
             </span>
             <span class="status" :class="{ 'is-done': doneToday(p.slug) }">
@@ -129,163 +201,337 @@ const stars = [
         <AppIcon name="bookmark" :size="16" class="inline-icon" /> y aparecerán aquí.
       </p>
     </section>
+
+    <ReadingSettings v-model="showSettings" />
   </div>
 </template>
 
 <style scoped>
-/* El retablo: arco de lapislázuli con estrellas doradas */
-.retablo {
-  position: relative;
-  overflow: hidden;
-  margin-top: 0.25rem;
-  border-radius: 48% 48% 22px 22px / 15rem 15rem 22px 22px;
-  background:
-    radial-gradient(120% 80% at 50% 0%, #2c4e93 0%, transparent 70%),
-    #1f3a73;
-  color: #f4f0e4;
-  isolation: isolate;
+/* ── Cabecera discreta ─────────────────────────────────────────────── */
+.home-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: -0.25rem -0.5rem 0.75rem 0;
 }
 
-:root[data-theme='dark'] .retablo {
-  background: radial-gradient(120% 80% at 50% 0%, #22407e 0%, transparent 70%), #182b57;
+.home-head__brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  font-family: var(--font-text);
+  font-weight: 500;
+  font-size: 1.15rem;
+  letter-spacing: 0.01em;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .retablo {
-    background: radial-gradient(120% 80% at 50% 0%, #22407e 0%, transparent 70%), #182b57;
-  }
+.home-head__mark {
+  color: var(--rubric);
+  font-size: 0.95em;
+}
+
+.home-head__btn {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  color: var(--ink-soft);
+}
+
+.home-head__btn:active {
+  background: var(--vellum-deep);
 }
 
 @media (min-width: 900px) {
-  .retablo {
-    max-width: 30rem;
+  .home-head__brand {
+    visibility: hidden;
+  }
+}
+
+/* ── La ventana: arco apuntado con el cielo de la hora ─────────────── */
+.ventana {
+  --sky-1: #193b80;
+  --sky-2: #2b58a3;
+  --sky-3: #4a76bb;
+  --glow: #cfe0ff;
+  --glow-o: 0.22;
+  --stars: 0;
+  position: relative;
+  isolation: isolate;
+  color: #f6f1e4;
+  filter: drop-shadow(0 18px 30px rgb(19 39 90 / 0.22));
+}
+
+:root[data-sky='alba'] .ventana {
+  --sky-1: #182a5e;
+  --sky-2: #3a4885;
+  --sky-3: #a97b80;
+  --glow: #f3c49a;
+  --glow-o: 0.55;
+  --stars: 0.3;
+}
+
+:root[data-sky='tarde'] .ventana {
+  --sky-1: #141f4b;
+  --sky-2: #33386f;
+  --sky-3: #8c5640;
+  --glow: #f0a560;
+  --glow-o: 0.45;
+  --stars: 0.5;
+}
+
+:root[data-sky='noche'] .ventana {
+  --sky-1: #0c1736;
+  --sky-2: #13224b;
+  --sky-3: #1d3368;
+  --glow: #7694dc;
+  --glow-o: 0.2;
+  --stars: 0.95;
+}
+
+@media (min-width: 900px) {
+  .ventana {
+    max-width: 28rem;
     margin-inline: auto;
   }
 }
 
-/* Filete dorado interior, que repite la forma del arco */
-.retablo::before {
-  content: '';
-  position: absolute;
-  inset: 7px;
-  border: 1px solid rgb(216 191 133 / 0.6);
-  border-radius: inherit;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.retablo__stars {
+.ventana__glass {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  fill: #d8bf85;
-  opacity: 0.55;
-  z-index: -1;
+  z-index: -2;
+  overflow: visible;
 }
 
-.retablo__inner {
-  position: relative;
-  z-index: 2;
-  padding: 4.25rem 1.6rem 1.75rem;
+.sky-1 { stop-color: var(--sky-1); }
+.sky-2 { stop-color: var(--sky-2); }
+.sky-3 { stop-color: var(--sky-3); }
+.glow-1 { stop-color: var(--glow); stop-opacity: var(--glow-o); }
+.glow-2 { stop-color: var(--glow); stop-opacity: 0; }
+
+/* Filete de oro que repite el arco, como el emplomado de una vidriera */
+.ventana__lead {
+  fill: none;
+  stroke: rgb(227 199 133 / 0.7);
+  stroke-width: 1;
+}
+
+.ventana__stars {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: var(--stars);
+  pointer-events: none;
+}
+
+.ventana__stars svg {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  fill: #ecd59c;
+}
+
+.ventana__inner {
+  padding: 5.5rem 1.75rem 1.4rem;
   text-align: center;
 }
 
-.retablo__date {
+.ventana__date {
   margin: 0;
   font-size: 0.95rem;
-  color: #d8bf85;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #e7cd8f;
 }
 
-.retablo__date::first-letter {
+.ventana__date::first-letter {
   text-transform: uppercase;
 }
 
-.retablo__greeting {
-  font-size: clamp(2.4rem, 11vw, 3.4rem);
-  margin: 0.3rem 0 1.5rem;
-  font-weight: 400;
-  letter-spacing: -0.01em;
-}
-
-.retablo__now {
-  margin: 0 auto;
-  max-width: 22rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid rgb(216 191 133 / 0.35);
-}
-
-.retablo__label {
-  margin: 0;
+.ventana__season {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin: 0.1rem 0 0;
   font-family: var(--font-text);
   font-style: italic;
-  color: #d8bf85;
+  font-size: 0.95rem;
+  color: rgb(246 241 228 / 0.72);
 }
 
-.retablo__prayer {
-  margin: 0.15rem 0 0.35rem;
-  font-family: var(--font-text);
-  font-weight: 700;
-  font-size: 1.65rem;
-  line-height: 1.15;
+/* El color litúrgico del tiempo, como la cinta de un misal */
+.season-mark {
+  width: 0.5rem;
+  height: 0.5rem;
+  transform: rotate(45deg);
+  background: #f6f1e4;
+}
+.season-mark[data-color='verde'] { background: #6fb086; }
+.season-mark[data-color='morado'] { background: #a98bd4; }
+.season-mark[data-color='rojo'] { background: #e0675e; }
+.season-mark[data-color='blanco'] { background: #f6f1e4; box-shadow: 0 0 0 1px #e7cd8f; }
+
+.ventana__greeting {
+  margin: 1.1rem 0 1.4rem;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.6rem, 12vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
 }
 
-.retablo__reason {
-  margin: 0 0 1.25rem;
-  color: rgb(244 240 228 / 0.8);
-  min-height: 1.45em;
-}
-
-.retablo__cta {
-  min-width: 11rem;
-}
-
-/* Único momento animado de la app: la sugerencia aparece al cargar */
-.retablo__now {
+.ventana__now {
+  margin: 0 auto;
+  max-width: 21rem;
+  padding-top: 1.3rem;
+  border-top: 1px solid rgb(227 199 133 / 0.3);
   opacity: 0.001;
   transition: opacity 0.5s ease 0.1s;
 }
 
-.retablo__now.is-ready {
+.ventana__now.is-ready {
   opacity: 1;
 }
 
-.retablo__epigraph {
-  margin: 2rem 0 0;
-  font-family: var(--font-text);
-  font-style: italic;
-  font-size: 0.98rem;
-  color: rgb(244 240 228 / 0.72);
-}
-
-.retablo__epigraph blockquote {
+.ventana__prayer {
   margin: 0;
+  font-family: var(--font-text);
+  font-weight: 500;
+  font-size: 1.7rem;
+  line-height: 1.15;
+  text-wrap: balance;
 }
 
-.retablo__epigraph figcaption {
-  font-family: var(--font-ui);
-  font-style: normal;
+.ventana__reason {
+  margin: 0.4rem 0 1.3rem;
+  color: rgb(246 241 228 / 0.8);
+  min-height: 1.45em;
+  text-wrap: balance;
+}
+
+.ventana__cta {
+  min-width: 11rem;
+}
+
+/* ── Las horas del día ─────────────────────────────────────────────── */
+.horas {
+  position: relative;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  margin: 2rem -1rem 0;
+  padding: 0;
+  opacity: 0.001;
+  transition: opacity 0.5s ease 0.2s;
+}
+
+.horas.is-ready {
+  opacity: 1;
+}
+
+/* La línea del día, de la mañana a la noche */
+.horas::before {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: calc(0.55rem + 4.5px);
+  height: 1px;
+  background: rgb(227 199 133 / 0.38);
+}
+
+.horas__btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0 0.35rem;
   font-size: 0.8rem;
-  margin-top: 0.2rem;
-  color: #d8bf85;
+  color: rgb(246 241 228 / 0.72);
+  border-radius: 8px;
 }
 
+.horas__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid rgb(231 205 143 / 0.75);
+  background: var(--sky-3);
+  transition: transform 0.2s ease;
+}
+
+.horas__btn.is-now .horas__dot {
+  background: #e7cd8f;
+  border-color: #e7cd8f;
+  box-shadow: 0 0 0 4px rgb(231 205 143 / 0.18), 0 0 12px rgb(231 205 143 / 0.55);
+}
+
+.horas__btn.is-shown {
+  color: #f6f1e4;
+  font-weight: 700;
+}
+
+.horas__btn.is-shown .horas__dot {
+  transform: scale(1.25);
+}
+
+.horas__btn:focus-visible {
+  outline-color: #e7cd8f;
+}
+
+/* ── Resto de la pantalla ──────────────────────────────────────────── */
 .rosary {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
-  padding: 0.9rem 0.25rem;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow);
 }
 
-.rosary .row__summary {
-  white-space: normal;
+.rosary:active {
+  background: var(--vellum-deep);
 }
 
 .rosary__icon {
-  color: var(--gold);
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
   flex: none;
+  border-radius: 50%;
+  color: var(--gold);
+  border: 1px solid var(--gold-soft);
+}
+
+.rosary__summary {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  margin-top: 0.15rem;
+}
+
+.devotion__bar {
+  display: block;
+  height: 3px;
+  margin-top: 0.55rem;
+  border-radius: 2px;
+  background: var(--line-soft);
+  overflow: hidden;
+}
+
+.devotion__bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(to right, var(--gold-soft), var(--gold));
+  transform-origin: left;
 }
 
 .status {

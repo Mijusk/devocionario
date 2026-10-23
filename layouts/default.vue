@@ -45,10 +45,10 @@ const items: { to: string; label: string; icon: IconName; match: (p: string) => 
   grid-template-columns: repeat(4, 1fr);
   height: calc(var(--nav-h) + var(--safe-b));
   padding-bottom: var(--safe-b);
-  background: color-mix(in srgb, var(--vellum) 88%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  border-top: 1px solid var(--line-soft);
 }
 
 .nav__brand {
@@ -63,8 +63,10 @@ const items: { to: string; label: string; icon: IconName; match: (p: string) => 
   gap: 0.2rem;
   font-size: 0.78rem;
   font-weight: 500;
+  letter-spacing: 0.01em;
   color: var(--ink-faint);
   position: relative;
+  transition: color 0.15s ease;
 }
 
 .nav__item.is-active {
@@ -113,8 +115,8 @@ const items: { to: string; label: string; icon: IconName; match: (p: string) => 
     align-items: center;
     gap: 0.6rem;
     font-family: var(--font-text);
-    font-weight: 700;
-    font-size: 1.35rem;
+    font-weight: 500;
+    font-size: 1.4rem;
     margin-bottom: 1.75rem;
     padding: 0 0.75rem;
   }

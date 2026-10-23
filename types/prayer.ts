@@ -46,6 +46,7 @@ export type CategorySlug =
 
 export type IconName =
   | 'cross'
+  | 'settings'
   | 'sun'
   | 'moon'
   | 'star'

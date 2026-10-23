@@ -1,4 +1,4 @@
-const themeBootstrap = `(function(){try{var s=JSON.parse(localStorage.getItem('dv:settings')||'{}');var t=s.theme||'auto';var d=document.documentElement;if(t!=='auto')d.dataset.theme=t;if(s.fontScale!=null)d.style.setProperty('--reading-scale',[0.9,1,1.12,1.26][s.fontScale]||1)}catch(e){}})()`
+const themeBootstrap = `(function(){try{var s=JSON.parse(localStorage.getItem('dv:settings')||'{}');var t=s.theme||'auto';var d=document.documentElement;if(t!=='auto')d.dataset.theme=t;var h=new Date().getHours();d.dataset.sky=h>=6&&h<9?'alba':h>=9&&h<17?'dia':h>=17&&h<21?'tarde':'noche';if(s.fontScale!=null)d.style.setProperty('--reading-scale',[0.9,1,1.12,1.26][s.fontScale]||1)}catch(e){}})()`
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-01-01',
@@ -8,6 +8,7 @@ export default defineNuxtConfig({
   css: [
     '@fontsource/alegreya/400.css',
     '@fontsource/alegreya/400-italic.css',
+    '@fontsource/alegreya/500.css',
     '@fontsource/alegreya/700.css',
     '@fontsource/alegreya-sans/400.css',
     '@fontsource/alegreya-sans/500.css',
@@ -23,7 +24,8 @@ export default defineNuxtConfig({
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
         { name: 'description', content: 'Oraciones católicas, el Rosario guiado y devociones para rezar desde el móvil, también sin conexión.' },
-        { name: 'theme-color', content: '#1F3A73' },
+        { name: 'theme-color', content: '#EEF0F3', media: '(prefers-color-scheme: light)' },
+        { name: 'theme-color', content: '#0A1020', media: '(prefers-color-scheme: dark)' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
       ],
@@ -54,7 +56,7 @@ export default defineNuxtConfig({
       start_url: '/',
       display: 'standalone',
       theme_color: '#1F3A73',
-      background_color: '#F1F2F5',
+      background_color: '#EEF0F3',
       icons: [
         { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
         { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
