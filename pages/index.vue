@@ -8,7 +8,28 @@ useHead({ title: 'Devocionario' })
 
 const now = useNow()
 const mounted = ref(false)
-onMounted(() => (mounted.value = true))
+
+// Apertura: al abrir la app o recargar, «Paz y bien» sobre la vidriera cerrada
+// durante un segundo; luego las dos hojas se abren y aparece el cielo de la hora.
+// Al volver a Hoy desde otra pantalla ya no se repite (solo en la primera carga).
+type Phase = 'intro' | 'opening' | 'open'
+const nuxtApp = useNuxtApp()
+const phase = ref<Phase>(import.meta.server || nuxtApp.isHydrating ? 'intro' : 'open')
+const timers: ReturnType<typeof setTimeout>[] = []
+const openWindow = () => {
+  if (phase.value !== 'intro') return
+  phase.value = 'opening'
+  timers.push(setTimeout(() => (phase.value = 'open'), 2000))
+}
+
+onMounted(() => {
+  mounted.value = true
+  if (phase.value === 'intro') {
+    // Al menos un segundo entero a la vista, contando desde que empezó a cargar.
+    timers.push(setTimeout(openWindow, Math.max(700, 1300 - performance.now())))
+  }
+})
+onBeforeUnmount(() => timers.forEach(clearTimeout))
 
 const today = computed(() => longDate(now.value))
 const season = computed(() => liturgicalSeason(now.value))
@@ -48,6 +69,9 @@ const showSettings = ref(false)
 // La ventana de lo alto: arco apuntado, en unidades de un lienzo de 100 × 150.
 const ARCH = 'M0 146V58C0 30 22 9 50 0C78 9 100 30 100 58V146Q100 150 96 150H4Q0 150 0 146Z'
 const ARCH_IN = 'M3.4 146.6V58.6C3.4 32 24.5 12.4 50 4.2C75.5 12.4 96.6 32 96.6 58.6V146.6Z'
+// Las dos hojas de la vidriera, dentro del filete de oro.
+const LEAF_L = 'M3.4 146.6V58.6C3.4 32 24.5 12.4 50 4.2V146.6Z'
+const LEAF_R = 'M50 4.2C75.5 12.4 96.6 32 96.6 58.6V146.6H50Z'
 
 // Estrellas fijas en la parte alta del cielo: [x %, y %, tamaño].
 // Quedan fuera de los textos: en lo alto del arco y en los márgenes.
@@ -66,7 +90,7 @@ const stars = [
       </button>
     </header>
 
-    <section class="ventana" aria-labelledby="hoy-title">
+    <section class="ventana" :class="`is-${phase}`" aria-labelledby="hoy-title">
       <svg class="ventana__glass" viewBox="0 0 100 150" preserveAspectRatio="none" aria-hidden="true">
         <defs>
           <linearGradient id="ventana-cielo" x1="0" y1="0" x2="0" y2="1">
@@ -78,6 +102,19 @@ const stars = [
             <stop offset="0" class="glow-1" />
             <stop offset="1" class="glow-2" />
           </radialGradient>
+          <!-- Vidriera: cristal de lapislázuli, luz que lo atraviesa y emplomado en rombos -->
+          <linearGradient id="vidriera-cristal" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#14275c" />
+            <stop offset="0.6" stop-color="#1f3d82" />
+            <stop offset="1" stop-color="#2a4c94" />
+          </linearGradient>
+          <radialGradient id="vidriera-luz" cx="0.5" cy="0.42" r="0.6">
+            <stop offset="0" stop-color="#f3dfae" stop-opacity="0.32" />
+            <stop offset="1" stop-color="#f3dfae" stop-opacity="0" />
+          </radialGradient>
+          <pattern id="vidriera-plomo" patternUnits="userSpaceOnUse" width="9.5" height="13">
+            <path d="M4.75 0L9.5 6.5L4.75 13L0 6.5Z" fill="none" stroke="#e7cd8f" stroke-opacity="0.5" stroke-width="0.3" />
+          </pattern>
         </defs>
         <path :d="ARCH" fill="url(#ventana-cielo)" />
         <path :d="ARCH" fill="url(#ventana-luz)" />
@@ -93,6 +130,26 @@ const stars = [
         >
           <path d="M0 -2.4L.5 -.5L2.4 0L.5 .5L0 2.4L-.5 .5L-2.4 0L-.5 -.5Z" />
         </svg>
+      </div>
+
+      <div v-if="phase !== 'open'" class="vidriera" aria-hidden="true" @click="openWindow">
+        <div class="vidriera__hoja vidriera__hoja--izq">
+          <svg viewBox="0 0 50 150" preserveAspectRatio="none">
+            <path :d="LEAF_L" fill="url(#vidriera-cristal)" />
+            <path :d="LEAF_L" fill="url(#vidriera-plomo)" />
+            <path :d="LEAF_L" fill="url(#vidriera-luz)" />
+            <path d="M50 4.2V146.6" class="vidriera__parteluz" vector-effect="non-scaling-stroke" />
+          </svg>
+        </div>
+        <div class="vidriera__hoja vidriera__hoja--der">
+          <svg viewBox="50 0 50 150" preserveAspectRatio="none">
+            <path :d="LEAF_R" fill="url(#vidriera-cristal)" />
+            <path :d="LEAF_R" fill="url(#vidriera-plomo)" />
+            <path :d="LEAF_R" fill="url(#vidriera-luz)" />
+            <path d="M50 4.2V146.6" class="vidriera__parteluz" vector-effect="non-scaling-stroke" />
+          </svg>
+        </div>
+        <p class="vidriera__paz">Paz y bien</p>
       </div>
 
       <div class="ventana__inner">
@@ -414,6 +471,104 @@ const stars = [
 
 .ventana__cta {
   min-width: 11rem;
+}
+
+/* ── Apertura: la vidriera se abre ─────────────────────────────────── */
+.vidriera {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  perspective: 1100px;
+  cursor: pointer;
+}
+
+.vidriera__hoja {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  backface-visibility: hidden;
+  transition:
+    transform 1.6s cubic-bezier(0.42, 0.04, 0.22, 1),
+    opacity 0.6s ease 0.95s;
+}
+
+.vidriera__hoja svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Cada hoja gira sobre su bisagra, en el filete de oro del borde */
+.vidriera__hoja--izq {
+  left: 0;
+  transform-origin: 6.8% 50%;
+}
+
+.vidriera__hoja--der {
+  right: 0;
+  transform-origin: 93.2% 50%;
+}
+
+.vidriera__parteluz {
+  stroke: #e7cd8f;
+  stroke-opacity: 0.85;
+  stroke-width: 1.5;
+}
+
+.vidriera__paz {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding-bottom: 8%;
+  font-family: var(--font-text);
+  font-style: italic;
+  font-size: clamp(2.6rem, 12vw, 3.4rem);
+  letter-spacing: -0.02em;
+  color: #f6f1e4;
+  text-shadow: 0 2px 18px rgb(8 16 40 / 0.6);
+  transition: opacity 0.4s ease, transform 0.6s ease;
+}
+
+.ventana.is-opening .vidriera {
+  pointer-events: none;
+}
+
+.ventana.is-opening .vidriera__hoja--izq {
+  transform: rotateY(-96deg);
+  opacity: 0;
+}
+
+.ventana.is-opening .vidriera__hoja--der {
+  transform: rotateY(96deg);
+  opacity: 0;
+}
+
+.ventana.is-opening .vidriera__paz {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+/* Lo de dentro aparece cuando las hojas ya van abiertas */
+.ventana.is-intro .ventana__inner,
+.ventana.is-intro .ventana__stars {
+  opacity: 0;
+}
+
+.ventana.is-opening .ventana__inner {
+  transition: opacity 0.9s ease 0.6s;
+}
+
+.ventana.is-opening .ventana__stars {
+  transition: opacity 1.2s ease 0.6s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vidriera__hoja {
+    transform: none !important;
+  }
 }
 
 /* ── Las horas del día ─────────────────────────────────────────────── */
