@@ -70,6 +70,14 @@ onBeforeUnmount(() => import.meta.client && window.removeEventListener('keydown'
             </p>
           </fieldset>
 
+          <label class="switch">
+            <span>
+              Cruz flotante
+              <small>Un crucifijo abajo a la derecha: tócalo para verlo en grande, arrástralo para moverlo.</small>
+            </span>
+            <input v-model="settings.floatingCross" type="checkbox" />
+          </label>
+
           <label v-if="hasLatin" class="switch">
             <span>Mostrar también en latín</span>
             <input v-model="settings.showLatin" type="checkbox" />
@@ -195,6 +203,14 @@ onBeforeUnmount(() => import.meta.client && window.removeEventListener('keydown'
   gap: 1rem;
   min-height: 3rem;
   font-weight: 500;
+}
+
+.switch small {
+  display: block;
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--ink-faint);
+  margin-top: 0.1rem;
 }
 
 .switch input {

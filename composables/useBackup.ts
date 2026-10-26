@@ -175,7 +175,7 @@ export function useBackup() {
     palabras.value = merged.palabras
     // Los ajustes de lectura solo se toman de la copia si aquí siguen de fábrica.
     const s = settings.value
-    const isDefault = s.fontScale === 1 && s.theme === 'auto' && !s.showLatin
+    const isDefault = s.fontScale === 1 && s.theme === 'auto' && !s.showLatin && s.floatingCross !== false
     if (backup.settings && isDefault) settings.value = { ...s, ...backup.settings }
     return merged.added
   }

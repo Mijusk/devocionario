@@ -24,6 +24,7 @@ npm run generate   # sitio estático en .output/public
 - **Oraciones guiadas**: Santa Brígida (12 años y 15 oraciones) y la Coronilla de la Divina Misericordia, con pasos, gestos de deslizar y memoria del paso en que te quedaste.
 - **Seguimiento**: anota los días rezados de las devociones largas y muestra los días seguidos.
 - **Lectura y apariencia** (botón de ajustes en Hoy, en Guardadas y en cada oración): cuatro tamaños de letra, tema según el sistema, claro u oscuro, latín en paralelo cuando existe, y la pantalla no se apaga mientras rezas.
+- **Cruz flotante**: un crucifijo pequeño abajo a la derecha en todas las pantallas. Un toque lo amplía con el fondo difuminado; otro toque, en cualquier sitio, lo devuelve. Se puede arrastrar; al abrir la app vuelve a su sitio. Se quita en Ajustes. La imagen está en `public/img/cristo*.webp`.
 - **Guardadas**: tus oraciones y palabras a mano. Todo se guarda en el propio navegador, sin cuentas; se pide almacenamiento persistente para que no se borre por falta de espacio.
 - **Copia de seguridad**: en Guardadas, guarda un archivo .json (en el móvil abre el menú de compartir) y restáuralo en otro dispositivo. Al restaurar se combina con lo que haya, nunca se borra nada. Si tienes devociones en curso y no hay copia reciente, aparece un aviso.
 

@@ -33,6 +33,7 @@ const items: { to: string; label: string; icon: IconName; match: (p: string) => 
     <main class="shell__main">
       <slot />
     </main>
+    <FloatingCross />
   </div>
 </template>
 

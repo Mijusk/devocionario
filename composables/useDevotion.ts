@@ -4,12 +4,14 @@ export interface Settings {
   fontScale: number
   theme: 'auto' | 'light' | 'dark'
   showLatin: boolean
+  /** Crucifijo flotante abajo a la derecha. */
+  floatingCross: boolean
 }
 
 export const FONT_SCALES = [0.9, 1, 1.12, 1.26]
 
 export function useSettings() {
-  return useLocalState<Settings>('settings', () => ({ fontScale: 1, theme: 'auto', showLatin: false }))
+  return useLocalState<Settings>('settings', () => ({ fontScale: 1, theme: 'auto', showLatin: false, floatingCross: true }))
 }
 
 /** Aplica tema y tamaño de letra al documento. Se llama una vez, en app.vue. */
