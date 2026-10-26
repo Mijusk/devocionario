@@ -51,7 +51,17 @@ const onUp = (e: PointerEvent) => {
   if (!start) return
   btn.value?.releasePointerCapture?.(e.pointerId)
   start = null
-  if (!dragged) show()
+}
+
+// Se abre con el «clic», no al levantar el dedo: si se abriera en pointerup,
+// el clic que el navegador lanza justo después caería sobre el velo y la
+// cerraría al instante. Tras arrastrar, ese clic se ignora.
+const onClick = () => {
+  if (dragged) {
+    dragged = false
+    return
+  }
+  show()
 }
 
 const onCancel = () => {
@@ -72,7 +82,11 @@ const fromButton = () => {
   return `translate(${dx}px, ${dy}px) scale(${s})`
 }
 
+let openedAt = 0
+
 const show = async () => {
+  if (open.value) return
+  openedAt = performance.now()
   open.value = true
   closing.value = false
   await nextTick()
@@ -85,6 +99,8 @@ const show = async () => {
 
 const hide = async () => {
   if (!open.value || closing.value) return
+  // Por si algún navegador entrega tarde el toque que la abrió.
+  if (performance.now() - openedAt < 350) return
   closing.value = true
   if (big.value && !reduced()) {
     const anim = big.value.animate([{ transform: 'none', opacity: 1 }, { transform: fromButton(), opacity: 0.9 }], {
@@ -99,7 +115,10 @@ const hide = async () => {
 }
 
 const onKey = (e: KeyboardEvent) => {
-  if (e.key === 'Escape') hide()
+  if (e.key === 'Escape') {
+    openedAt = 0
+    hide()
+  }
 }
 watch(open, (v) => {
   if (!import.meta.client) return
@@ -125,8 +144,7 @@ watch(enabled, (v) => !v && (open.value = false))
         @pointermove="onMove"
         @pointerup="onUp"
         @pointercancel="onCancel"
-        @keydown.enter.prevent="show"
-        @keydown.space.prevent="show"
+        @click="onClick"
       >
         <img src="/img/cristo-mini.webp" alt="" width="62" height="75" draggable="false" />
       </button>
