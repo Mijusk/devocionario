@@ -141,6 +141,7 @@ const share = async () => {
 
 .sheet-text,
 .promises__comment {
+  white-space: pre-line;
   margin: 0 0 1rem;
   color: var(--ink-soft);
   line-height: 1.5;
