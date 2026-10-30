@@ -1,21 +1,20 @@
 import type { Prayer } from '~/types/prayer'
 import { p, rubric, ref, pnAmGloria } from '../helpers'
 
-const ofrecimiento = 'Padre Eterno, por medio de las manos inmaculadas de María y el Sagrado Corazón de Jesús,'
-
 const comentarioPromesas =
   'Estas promesas acompañan tradicionalmente a la devoción en estampas y folletos. La Iglesia nunca las ha aprobado oficialmente, así que conviene leerlas con prudencia. La oración en sí es buena y una hermosa meditación de la Pasión.'
 
+// Texto literal de ACI Prensa («Oraciones de Santa Brígida por 12 años»).
 const promesas12Anos = {
   comment: comentarioPromesas,
   items: [
-    'El alma que las rece no sufrirá el purgatorio.',
-    'Será aceptada entre los mártires, como si hubiera derramado su sangre por la fe.',
-    'Podrá elegir a otras tres almas, a las que Jesús mantendrá en gracia suficiente para santificarse.',
-    'Ninguno de sus familiares de las cuatro generaciones siguientes se perderá.',
-    'Sabrá de su muerte un mes antes de que ocurra.',
+    'El alma que las reza no sufrirá ningún Purgatorio.',
+    'El alma que las reza será aceptada entre los mártires como si hubiera derramado su propia sangre por la fe.',
+    'El alma que las reza puede (debe) elegir a otros tres a quienes Jesús mantendrá luego en un estado de gracia suficiente para que se santifiquen. (*)',
+    'Ninguna de las cuatro generaciones siguientes al alma que las reza se perderá.',
+    'El alma que las reza será consciente de su muerte un mes antes de que ocurra.',
   ],
-  footnote: 'Según la misma tradición, si la persona muere antes de completar los doce años, el Señor lo acepta como cumplido; y si se omite algún día por causa justificada, puede recuperarse después.',
+  footnote: '(*) Escribir los tres nombres (personas vivas) en un papel y guardarlo. Los nombres no se pueden cambiar.',
 }
 
 const promesas15Oraciones = {
@@ -46,18 +45,18 @@ const promesas15Oraciones = {
 export const pasion: Prayer[] = [
   {
     slug: 'santa-brigida-12-anos',
-    title: 'Oraciones de Santa Brígida (12 años)',
+    // Texto literal de ACI Prensa.
+    title: 'Oraciones de Santa Brígida por 12 años',
     summary: 'Siete oraciones diarias sobre las llagas de Cristo.',
     category: 'pasion',
-    tags: ['santa brígida', 'llagas', 'sangre de cristo', 'devoción'],
+    tags: ['santa brígida', 'llagas', 'sangre de cristo', 'devoción', '12 años'],
     promises: promesas12Anos,
     tracking: { label: 'Días rezados', goalDays: 365 * 12 },
     steps: [
       {
         title: 'Oración inicial',
         blocks: [
-          ref('credo'),
-          p('Oh Jesús, ahora deseo rezar la oración del Señor siete veces\njunto con el amor con que Tú santificaste esta oración en tu Corazón.\nTómala de mis labios hasta tu Sagrado Corazón.\nMejórala y complétala para que le brinde tanto honor y felicidad a la Trinidad\nen la tierra como Tú lo garantizaste con esta oración.\nQue esta se derrame sobre tu santa humanidad\npara la glorificación de tus dolorosas heridas\ny la preciosísima Sangre que Tú derramaste de ellas.\nAsí sea.'),
+          p('Oh Jesús, ahora deseo rezar la oración del Señor siete veces junto con el amor con que Tú santificaste esta oración en Tu Corazón. Tómala de mis labios hasta Tu Sagrado Corazón. Mejórala y complétala para que le brinde tanto honor y felicidad a la Trinidad en la tierra como Tú lo garantizaste con esta oración. Que esta se derrame sobre Tu santa humanidad para la glorificación de Tus dolorosas heridas y la preciosísima Sangre que Tú derramaste de ellas. Amén'),
         ],
       },
       {
@@ -65,15 +64,15 @@ export const pasion: Prayer[] = [
         subtitle: 'Primera oración',
         blocks: [
           ...pnAmGloria(),
-          p(`${ofrecimiento}\nte ofrezco las primeras heridas, los primeros dolores\ny el primer derramamiento de sangre\ncomo expiación de los pecados de mi infancia y de toda la humanidad,\ncomo protección contra el primer pecado mortal,\nespecialmente entre mis parientes.\nAsí sea.`),
+          p('Padre Eterno, por medio de las manos inmaculadas de María y el Sagrado Corazón de Jesús, Te ofrezco las primeras heridas, los primeros dolores y el primer derrame de Sangre como expiación de los pecados de mi infancia y de toda la humanidad, como protección contra el primer pecado mortal, especialmente entre mis parientes.'),
         ],
       },
       {
-        title: 'La agonía en el Huerto de los Olivos',
+        title: 'La agonía de Jesús en el Huerto de los Olivos',
         subtitle: 'Segunda oración',
         blocks: [
           ...pnAmGloria(),
-          p(`${ofrecimiento}\nte ofrezco el intenso sufrimiento del Corazón de Jesús\nen el Huerto de los Olivos\ny cada gota de su sudor de sangre\ncomo expiación de mis pecados del corazón y los de toda la humanidad,\ncomo protección contra tales pecados\ny para que se extienda el amor divino y fraterno.\nAsí sea.`),
+          p('Padre Eterno, por medio de las manos inmaculadas de María y el Sagrado Corazón de Jesús, te ofrezco el intenso sufrimiento del Corazón de Jesús en el Huerto de los Olivos y cada gota de sudor de sangre como expiación de mis pecados del corazón y los de toda la humanidad, como protección contra tales pecados y para que se extienda el amor divino y fraterno.'),
         ],
       },
       {
@@ -81,7 +80,7 @@ export const pasion: Prayer[] = [
         subtitle: 'Tercera oración',
         blocks: [
           ...pnAmGloria(),
-          p(`${ofrecimiento}\nte ofrezco las muchas miles de heridas, los terribles dolores\ny la preciosísima sangre de la flagelación\ncomo expiación de mis pecados de la carne y los de toda la humanidad,\ncomo protección contra tales pecados\ny la preservación de la inocencia,\nespecialmente entre mis parientes.\nAsí sea.`),
+          p('Padre Eterno, por medio de las manos inmaculadas de María y el Sagrado Corazón de Jesús, te ofrezco las muchas miles de heridas, los terribles dolores y la preciosísima sangre de la flagelación como expiación de mis pecados de la carne y los de toda la humanidad, como protección contra tales pecados y la preservación de la inocencia, especialmente entre mis parientes.'),
         ],
       },
       {
@@ -89,7 +88,7 @@ export const pasion: Prayer[] = [
         subtitle: 'Cuarta oración',
         blocks: [
           ...pnAmGloria(),
-          p(`${ofrecimiento}\nte ofrezco las heridas, los dolores\ny la preciosísima sangre de la sagrada cabeza de Jesús\ntras la coronación de espinas,\ncomo expiación de mis pecados del espíritu y los de toda la humanidad,\ncomo protección contra tales pecados\ny para que se extienda el reino de Cristo aquí en la tierra.\nAsí sea.`),
+          p('Padre Eterno, por medio de las manos inmaculadas de María y el Sagrado Corazón de Jesús, te ofrezco las heridas, los dolores y la preciosísima sangre de la sagrada cabeza de Jesús luego de la coronación de espinas, como expiación de mis pecados del espíritu y los de toda la humanidad, como protección contra tales pecados y para que se extienda el reino de Cristo aquí en la tierra.'),
         ],
       },
       {
@@ -97,25 +96,23 @@ export const pasion: Prayer[] = [
         subtitle: 'Quinta oración',
         blocks: [
           ...pnAmGloria(),
-          p(`${ofrecimiento}\nte ofrezco los sufrimientos en el camino de la cruz,\nespecialmente la santa herida de su hombro y su preciosísima sangre,\ncomo expiación de mi rechazo de la cruz y el de toda la humanidad,\nde todas mis protestas contra tus planes divinos\ny de todos los demás pecados de palabra,\ncomo protección contra tales pecados\ny para un verdadero amor a la cruz.\nAsí sea.`),
+          p('Padre Eterno, por medio de las manos inmaculadas de María y el Sagrado Corazón de Jesús, te ofrezco los sufrimientos en el camino a la cruz, especialmente la santa herida en su hombro y la preciosísima sangre como expiación de mi negación de la cruz y la de toda la humanidad, todas mis protestas contra tus planes divinos y todos los demás pecados de palabra, como protección contra tales pecados y para un verdadero amor a la cruz.'),
         ],
       },
       {
-        title: 'La crucifixión',
+        title: 'La crucifixión de Jesús',
         subtitle: 'Sexta oración',
         blocks: [
           ...pnAmGloria(),
-          p(`${ofrecimiento}\nte ofrezco a tu Hijo en la cruz, cuando lo clavaron y lo levantaron,\nlas heridas de sus manos y de sus pies\ny los tres hilos de preciosísima sangre que derramó allí por nosotros,\nlas extremas torturas del cuerpo y del alma,\nsu muerte preciosa\ny su renovación incruenta en todas las santas Misas de la tierra,`),
-          p('como expiación de todas las faltas contra los votos y las reglas de las órdenes religiosas,\ncomo reparación de mis pecados y los de todo el mundo,\npor los enfermos y moribundos,\npor todos los santos sacerdotes y laicos,\npor las intenciones del Santo Padre,\npor la restauración de las familias cristianas,\npara el fortalecimiento de la fe,\npor nuestro país y por la unión de todas las naciones en Cristo y su Iglesia,\nasí como por la diáspora.\nAsí sea.'),
+          p('Padre Eterno, por medio de las manos inmaculadas de María y el Sagrado Corazón de Jesús, te ofrezco a Tu Hijo en la cruz, cuando lo clavaron y lo levantaron, las heridas en sus manos y en sus pies y los tres hilos de la preciosísima sangre que derramó allí por nosotros, las extremas torturas del cuerpo y del alma, su muerte preciosa y su renovación no sangrienta en todas las santas misas de la Tierra, como expiación de todas las heridas contra los votos y normas dentro de las Órdenes, como reparación de mis pecados y los de todo el mundo, por los enfermos y moribundos, por todos los santos sacerdotes y laicos, por las intenciones del Santo Padre por la restauración de las familias cristianas, para el fortalecimiento de la Fe, por nuestro país y por la unión de todas las naciones en Cristo y su Iglesia, así como también por la diáspora.'),
         ],
       },
       {
-        title: 'La llaga del costado',
+        title: 'La llaga del costado de Jesús',
         subtitle: 'Séptima oración',
         blocks: [
           ...pnAmGloria(),
-          p('Padre Eterno, acepta como dignas,\npor las necesidades de la santa Iglesia\ny como expiación de los pecados de toda la humanidad,\nla preciosísima sangre y el agua\nque manaron de la herida del Sagrado Corazón de Jesús.\nSé misericordioso con nosotros.'),
-          p('¡Sangre de Cristo, último contenido precioso de su Sagrado Corazón,\nlávame de todas mis culpas y de las de los demás!\n¡Agua del costado de Cristo,\nlávame totalmente de las penas del pecado\ny extingue las llamas del purgatorio\npara mí y para todas las almas del purgatorio!\nAsí sea.'),
+          p('Padre Eterno, acepta como dignas, por las necesidades de la Santa Iglesia y como expiación de los pecados de toda la humanidad, la preciosísima sangre y el agua que manó de la herida del Sagrado Corazón de Jesús. Sé misericordioso para con nosotros. ¡Sangre de Cristo, el último contenido precioso de su Sagrado Corazón, lávame de todas mis culpas de pecado y las de los demás! ¡Agua del costado de Cristo; lávame totalmente de las penitencias del pecado y extingue las llamas del Purgatorio para mí y para todas las almas del Purgatorio! Amén.'),
         ],
       },
     ],
